@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../projects/projects_page.dart';
 import '../account/account_page.dart';
 import '../../data/mock_data.dart';
-import '../../models/models.dart';
 
 class ClientHome extends StatefulWidget {
   const ClientHome({super.key});

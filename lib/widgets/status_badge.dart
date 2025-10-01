@@ -13,7 +13,7 @@ class StatusBadge extends StatelessWidget {
     switch (status) {
       case ProjectStatus.completed:
         label = 'Completed';
-        bg = AppColors.green.withOpacity(.2);
+  bg = kGreen.withOpacity(.2);
         break;
       case ProjectStatus.blocked:
         label = 'Blocked';

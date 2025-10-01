@@ -8,6 +8,8 @@ class ProjectRow extends StatelessWidget {
   final DateTime? date;
   final models.ProjectStatus status;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const ProjectRow({
     super.key,
@@ -16,6 +18,8 @@ class ProjectRow extends StatelessWidget {
     required this.status,
     this.date,
     this.onTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -48,7 +52,24 @@ class ProjectRow extends StatelessWidget {
           ),
         ],
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (onEdit != null)
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.green),
+              onPressed: onEdit,
+              tooltip: 'Edit',
+            ),
+          if (onDelete != null)
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+              tooltip: 'Delete',
+            ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );
   }

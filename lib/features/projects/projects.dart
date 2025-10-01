@@ -1,6 +1,6 @@
+import '../../models/models.dart';
 import 'package:flutter/material.dart';
 import 'widgets/project_row.dart';
-import '../../widgets/status_badge.dart';
 
 // Entry point for the Projects feature
 class ProjectsScreen extends StatefulWidget {

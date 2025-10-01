@@ -42,8 +42,8 @@ class _ContractorHomeState extends State<ContractorHome> {
               onPressed: () => _toast('Create new project'),
               icon: const Icon(Icons.add_circle),
               label: const Text('New Project'),
-              backgroundColor: AppColors.green,
-              foregroundColor: AppColors.black,
+              backgroundColor: kGreen,
+              foregroundColor: kBlack,
             )
           : null,
       bottomNavigationBar: BottomNavigationBar(

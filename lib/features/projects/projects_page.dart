@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
 import '../../models/models.dart' as models;
-import '../../widgets/status_badge.dart';
 import 'project_detail_screen.dart';
 import '../projects/widgets/project_row.dart' as rows;
+import 'edit_project_dialog.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -64,7 +64,25 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   );
                   setState(() {});
                 },
+                onEdit: () async {
+                  final result = await showDialog<EditProjectResult>(
+                    context: context,
+                    builder: (context) => EditProjectDialog(project: p),
+                  );
+                  if (result != null) {
+                    setState(() {
+                      p.title = result.title;
+                      p.dueDate = result.dueDate;
+                    });
+                  }
+                },
+                onDelete: () {
+                  setState(() {
+                    MockDB.projects.removeWhere((proj) => proj.id == p.id);
+                  });
+                },
               );
+
             },
           ),
         ),
