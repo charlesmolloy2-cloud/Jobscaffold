@@ -73,8 +73,8 @@ class _FilesPageState extends State<FilesPage> {
 }
 
 class _FileItem {
-  String name;
-  String description;
+  final String name;
+  final String description;
   _FileItem({required this.name, required this.description});
 }
 

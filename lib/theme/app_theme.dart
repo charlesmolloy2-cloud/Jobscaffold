@@ -9,6 +9,9 @@ const Color kGray = Color(0xFF2A2A2D);
 const Color kLightGray = Color(0xFF3A3A3E);
 const Color kWhite = Color(0xFFFFFFFF);
 const Color kLightGreenBg = Color(0xFFEFFAF3);
+const Color kBlue = Color(0xFF3498DB);
+const Color kBlueDark = Color(0xFF1565C0);
+const Color kLightBlueBg = Color(0xFFE3F2FD);
 
 class AppTheme {
   static ThemeData get light {
