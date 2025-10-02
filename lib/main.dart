@@ -11,8 +11,12 @@ import 'pages/contractor/contractor_home_page.dart';
 import 'pages/client/client_home_page.dart';
 import 'features/files/files_page.dart';
 import 'features/localization/localization_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_demo.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(
     ChangeNotifierProvider(
       create: (_) {
@@ -45,6 +49,7 @@ class MyApp extends StatelessWidget {
         '/client': (_) => const ClientHomePage(),
         '/files': (_) => const FilesPage(),
         '/localization': (context) => const LocalizationPage(),
+        '/firebase_demo': (_) => const FirebaseDemoPage(),
       },
     );
   }
