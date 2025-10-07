@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({Key? key}) : super(key: key);

@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   bool _bypassProcessing = false;
 
   // Replace this with secure config / env retrieval for real use.
-  static const _devPinSecret = '1234'; // For demo only
+  // static const _devPinSecret = '1234'; // For demo only
 
   @override
   void dispose() {
@@ -56,8 +56,8 @@ class _HomePageState extends State<HomePage> {
     if (!_adminFormKey.currentState!.validate()) return;
     setState(() => _adminSigningIn = true);
     try {
-      final email = _adminEmail.text.trim();
-      final password = _adminPassword.text;
+  // final email = _adminEmail.text.trim();
+  // final password = _adminPassword.text;
       // TODO: Replace with your Auth call (Firebase/Auth or AppState)
       // Example:
       // await AuthService.signInAsAdmin(email, password);
@@ -76,8 +76,8 @@ class _HomePageState extends State<HomePage> {
     if (!_clientFormKey.currentState!.validate()) return;
     setState(() => _clientSigningIn = true);
     try {
-      final email = _clientEmail.text.trim();
-      final password = _clientPassword.text;
+  // final email = _clientEmail.text.trim();
+  // final password = _clientPassword.text;
       // TODO: Replace with your Auth call (Firebase/Auth or AppState)
       // Example:
       // await AuthService.signInAsClient(email, password);

@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
 
 class PaymentsPage extends StatefulWidget {
   const PaymentsPage({Key? key}) : super(key: key);

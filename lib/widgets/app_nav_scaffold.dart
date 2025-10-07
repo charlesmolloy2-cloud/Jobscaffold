@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'more_menu.dart';
+import 'package:provider/provider.dart';
+import '../state/app_state.dart';
 
 class AppNavScaffold extends StatefulWidget {
 	final List<Widget> tabs;
@@ -7,6 +9,8 @@ class AppNavScaffold extends StatefulWidget {
 	final int initialIndex;
 	final List<Widget?>? floatingActionButtons;
 	final List<String>? appBarTitles;
+  final List<Widget>? appBarActions;
+  final Widget? topBanner;
 
 	const AppNavScaffold({
 		super.key,
@@ -15,6 +19,8 @@ class AppNavScaffold extends StatefulWidget {
 		this.initialIndex = 0,
 		this.floatingActionButtons,
 		this.appBarTitles,
+    this.appBarActions,
+    this.topBanner,
 	});
 
 	@override
@@ -41,22 +47,53 @@ class _AppNavScaffoldState extends State<AppNavScaffold> {
 					? (List<String>.from(widget.appBarTitles!)..add('More'))
 					: null;
 
-				return LayoutBuilder(
+					return LayoutBuilder(
 					builder: (context, constraints) {
 						final wide = constraints.maxWidth > 900;
 						return Scaffold(
-							appBar: appBarTitles != null
-									? AppBar(title: Text(appBarTitles[_currentIndex]))
-									: null,
-							body: Center(
-								child: ConstrainedBox(
-									constraints: BoxConstraints(maxWidth: wide ? 900 : double.infinity),
-									child: IndexedStack(
-										index: _currentIndex,
-										children: tabs,
+								appBar: appBarTitles != null
+										? AppBar(
+												title: Text(appBarTitles[_currentIndex]),
+												actions: [
+													...(widget.appBarActions ?? const []),
+													PopupMenuButton<String>(
+														onSelected: (value) {
+															if (value == 'reduce_motion') {
+																final appState = context.read<AppState>();
+																appState.setReduceMotion(!appState.reduceMotion);
+															}
+														},
+														itemBuilder: (context) {
+															final reduce = context.select<AppState, bool>((s) => s.reduceMotion);
+															return [
+																CheckedPopupMenuItem<String>(
+																	value: 'reduce_motion',
+																	checked: reduce,
+																	child: const Text('Reduce motion'),
+																),
+															];
+														},
+													),
+												],
+											)
+										: null,
+								body: Center(
+									child: ConstrainedBox(
+										constraints: BoxConstraints(maxWidth: wide ? 900 : double.infinity),
+										child: Column(
+											crossAxisAlignment: CrossAxisAlignment.stretch,
+											children: [
+												if (widget.topBanner != null) widget.topBanner!,
+												Expanded(
+													child: IndexedStack(
+														index: _currentIndex,
+														children: tabs,
+													),
+												),
+											],
+										),
 									),
 								),
-							),
 							floatingActionButton: widget.floatingActionButtons != null && _currentIndex < widget.floatingActionButtons!.length
 									? Padding(
 											padding: EdgeInsets.only(

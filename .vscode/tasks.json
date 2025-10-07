@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Flutter: Run app on Chrome",
+			"type": "shell",
+			"command": "flutter run -d chrome",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [
+				"$dart-build_runner"
+			],
+			"group": "build"
+		}
+	]
+}

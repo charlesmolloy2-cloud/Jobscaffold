@@ -3,6 +3,7 @@ import '../../state/dummy_data.dart';
 import 'package:flutter/material.dart';
 import '../../state/app_state.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ContractorAccountPage extends StatelessWidget {
 	const ContractorAccountPage({super.key});
@@ -48,10 +49,20 @@ class ContractorAccountPage extends StatelessWidget {
 						),
 						const SizedBox(height: 24),
 						ElevatedButton(
-							onPressed: () {
+							onPressed: () async {
 								final appState = Provider.of<AppState>(context, listen: false);
 								appState.signOut();
-								Navigator.pushReplacementNamed(context, '/login');
+								try {
+									await FirebaseAuth.instance.signOut();
+								} catch (_) {}
+								if (context.mounted) {
+									Navigator.pushNamedAndRemoveUntil(
+										context,
+										'/contractor_signin',
+										(route) => false,
+										arguments: const {'signedOut': true},
+									);
+								}
 							},
 							child: const Text('Sign Out'),
 						),

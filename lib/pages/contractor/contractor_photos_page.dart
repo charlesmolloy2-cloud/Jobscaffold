@@ -13,9 +13,10 @@ class _ContractorPhotosPageState extends State<ContractorPhotosPage> {
 
   Future<void> _pickFiles() async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: true);
-    if (result != null) {
+    final picked = result?.files.whereType<PlatformFile>().toList();
+    if (picked != null && picked.isNotEmpty) {
       setState(() {
-        _files.addAll(result.files);
+        _files.addAll(picked);
       });
     }
   }

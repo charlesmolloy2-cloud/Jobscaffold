@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
 
 class RoleSelectPage extends StatelessWidget {
   const RoleSelectPage({Key? key}) : super(key: key);
@@ -22,7 +21,7 @@ class RoleSelectPage extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 icon: const Icon(Icons.person_outline),
-                label: const Text('Client'),
+                label: const Text('Customer'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(220, 48),
                   backgroundColor: Colors.white,
