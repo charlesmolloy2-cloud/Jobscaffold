@@ -4,6 +4,8 @@ import '../../state/app_state.dart';
 import '../../services/firestore_repository.dart';
 import '../../models/project.dart' as app_models;
 import '../../models/update.dart' as app_updates;
+import 'package:intl/intl.dart';
+import '../../widgets/error_banner.dart';
 
 class AppProjectDetailPage extends StatelessWidget {
   const AppProjectDetailPage({super.key});
@@ -24,6 +26,14 @@ class AppProjectDetailPage extends StatelessWidget {
     return StreamBuilder<app_models.Project?>(
       stream: repo?.watchProject(projectId),
       builder: (context, snap) {
+        if (snap.hasError) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final msg = 'Failed to load project. Using local data.';
+            ScaffoldMessenger.of(context).showMaterialBanner(
+              appErrorBanner(context, message: msg, onRetry: () {}),
+            );
+          });
+        }
         final project = snap.data ?? _findLocalProject(appState, projectId);
         if (project == null) {
           return Scaffold(
@@ -33,6 +43,7 @@ class AppProjectDetailPage extends StatelessWidget {
         }
   final p = project;
   final repo = context.read<FirestoreRepository?>();
+  final currency = NumberFormat.simpleCurrency();
 
         return Scaffold(
       appBar: AppBar(
@@ -54,8 +65,16 @@ class AppProjectDetailPage extends StatelessWidget {
                 assignedCustomerId: p.assignedCustomerId,
                 assignedContractorId: p.assignedContractorId,
               );
-              if (repo != null) {
-                await repo.updateProject(updated);
+              try {
+                if (repo != null) {
+                  await repo.updateProject(updated);
+                }
+              } catch (e) {
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showMaterialBanner(
+                  appErrorBanner(context, message: 'Failed to update status', onRetry: () {}),
+                );
+                return;
               }
               // ignore: use_build_context_synchronously
               context.read<AppState>().updateProject(updated);
@@ -92,20 +111,27 @@ class AppProjectDetailPage extends StatelessWidget {
             photos: const [],
           );
           if (repo != null) {
-            await repo.addUpdate(update);
-            final updatedProject = app_models.Project(
-              id: p.id,
-              title: p.title,
-              address: p.address,
-              status: p.status,
-              lastUpdateAt: DateTime.now(),
-              assignedCustomerId: p.assignedCustomerId,
-              assignedContractorId: p.assignedContractorId,
-            );
-            await repo.updateProject(updatedProject);
-            // Also refresh local state so other parts of app using AppState see latest time.
-            // ignore: use_build_context_synchronously
-            context.read<AppState>().updateProject(updatedProject);
+            try {
+              await repo.addUpdate(update);
+              final updatedProject = app_models.Project(
+                id: p.id,
+                title: p.title,
+                address: p.address,
+                status: p.status,
+                lastUpdateAt: DateTime.now(),
+                assignedCustomerId: p.assignedCustomerId,
+                assignedContractorId: p.assignedContractorId,
+              );
+              await repo.updateProject(updatedProject);
+              // Also refresh local state so other parts of app using AppState see latest time.
+              // ignore: use_build_context_synchronously
+              context.read<AppState>().updateProject(updatedProject);
+            } catch (e) {
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(context).showMaterialBanner(
+                appErrorBanner(context, message: 'Failed to add update', onRetry: () {}),
+              );
+            }
           } else {
             final list = [update, ...appState.updates];
             // ignore: use_build_context_synchronously
@@ -147,6 +173,11 @@ class AppProjectDetailPage extends StatelessWidget {
             StreamBuilder(
               stream: repo.watchProjectSnapshot(p.id),
               builder: (context, AsyncSnapshot snap) {
+                if (snap.hasError) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showMaterialBanner(appErrorBanner(context, message: 'Failed to load extra details', onRetry: () {}));
+                  });
+                }
                 if (!snap.hasData) return const SizedBox.shrink();
                 final data = (snap.data?.data() as Map<String, dynamic>?) ?? const <String, dynamic>{};
                 final description = (data['description'] as String?)?.trim();
@@ -164,7 +195,7 @@ class AppProjectDetailPage extends StatelessWidget {
                   ));
                 }
                 if (budget != null && budget.toString().isNotEmpty) {
-                  final budgetText = budget is num ? '\$${budget.toStringAsFixed(2)}' : budget.toString();
+                  final budgetText = budget is num ? currency.format(budget) : budget.toString();
                   details.add(Card(
                     child: ListTile(
                       leading: const Icon(Icons.attach_money),
@@ -178,7 +209,7 @@ class AppProjectDetailPage extends StatelessWidget {
                     child: ListTile(
                       leading: const Icon(Icons.event),
                       title: const Text('Start date'),
-                      subtitle: Text('${startDate.toLocal().toString().split(' ')[0]}'),
+                      subtitle: Text(DateFormat.yMMMd().format(startDate.toLocal())),
                     ),
                   ));
                 }
@@ -192,6 +223,11 @@ class AppProjectDetailPage extends StatelessWidget {
             StreamBuilder<List<app_updates.Update>>(
               stream: repo.watchUpdates(p.id),
               builder: (context, updatesSnap) {
+                if (updatesSnap.hasError) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showMaterialBanner(appErrorBanner(context, message: 'Failed to load updates', onRetry: () {}));
+                  });
+                }
                 final updates = updatesSnap.data ?? const <app_updates.Update>[];
                 if (updates.isEmpty) return const Text('No updates yet.');
                 return Column(

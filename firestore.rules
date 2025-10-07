@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper to check membership against a project document
+    function isProjectMember(project) {
+      return isSignedIn() && (
+        project.data.assignedCustomerId == request.auth.uid ||
+        project.data.assignedContractorId == request.auth.uid
+      );
+    }
+
+    match /projects/{projectId} {
+      // Read allowed if the user is assigned to the project
+      allow get, list: if false; // disallow broad listing; use filtered queries client-side
+      allow get: if isProjectMember(resource);
+      allow list: if false; // prevent collection-wide scans
+
+      // Create allowed if the new doc assigns the caller as customer or contractor
+      allow create: if isSignedIn() && (
+        request.resource.data.assignedCustomerId == request.auth.uid ||
+        request.resource.data.assignedContractorId == request.auth.uid
+      );
+
+      // Update/delete allowed if caller is an existing member AND cannot reassign membership
+      allow update, delete: if isProjectMember(resource)
+        && request.resource.data.assignedCustomerId == resource.data.assignedCustomerId
+        && request.resource.data.assignedContractorId == resource.data.assignedContractorId;
+    }
+
+    match /updates/{updateId} {
+      // Read/update/delete only by members of the linked project
+      allow read, update, delete: if isSignedIn() &&
+        isProjectMember(get(/databases/$(database)/documents/projects/$(resource.data.projectId)));
+
+      // Create allowed only if caller is member of the project referenced by projectId
+      allow create: if isSignedIn() &&
+        isProjectMember(get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)));
+    }
+  }
+}

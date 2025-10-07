@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/project.dart';
 import '../services/firestore_repository.dart';
+import 'package:intl/intl.dart';
 
 class ProjectCard extends StatelessWidget {
 	final Project project;
@@ -42,7 +43,7 @@ class ProjectCard extends StatelessWidget {
 										],
 									),
 																		const SizedBox(height: 6),
-																		// Extra details from Firestore when available
+																																																																																																																		// Extra details from Firestore when available
 																		Builder(
 																			builder: (context) {
 																				final repo = context.read<FirestoreRepository?>();
@@ -57,6 +58,8 @@ class ProjectCard extends StatelessWidget {
 																						final startDateStr = data['startDate'] as String?;
 																						final startDate = startDateStr != null && startDateStr.isNotEmpty ? DateTime.tryParse(startDateStr) : null;
 
+																																																				final currency = NumberFormat.simpleCurrency();
+
 																						final lines = <Widget>[];
 																						if (description != null && description.isNotEmpty) {
 																							lines.add(Text(
@@ -66,11 +69,11 @@ class ProjectCard extends StatelessWidget {
 																								style: TextStyle(color: Colors.grey[700]),
 																							));
 																						}
-																						if (budget != null || startDate != null) {
+																																																																				if (budget != null || startDate != null) {
 																							String parts = '';
-																							if (budget != null) {
-																								final bText = budget is num ? '\$${budget.toStringAsFixed(2)}' : budget.toString();
-																								parts = bText;
+																																																					if (budget != null) {
+																																																								final bText = budget is num ? currency.format(budget) : budget.toString();
+																																																								parts = bText;
 																							}
 																							if (startDate != null) {
 																								final sText = startDate.toLocal().toString().split(' ')[0];

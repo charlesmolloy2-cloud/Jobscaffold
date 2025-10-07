@@ -1,4 +1,6 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:url_strategy/url_strategy.dart';
+import 'utils/title_helper_stub.dart' if (dart.library.html) 'utils/title_helper_web.dart' as title_helper;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,8 @@ final _AppRouteObserver _routeObserver = _AppRouteObserver();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Clean path URLs (no #) for web
+  setPathUrlStrategy();
   // Avoid double-initialization during hot restart/web.
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
@@ -45,7 +49,7 @@ class MyApp extends StatelessWidget {
       title: 'Project Bridge',
       theme: AppTheme.light,
       navigatorKey: _navigatorKey,
-      navigatorObservers: <NavigatorObserver>[_routeObserver],
+  navigatorObservers: <NavigatorObserver>[_routeObserver, _TitleObserver()],
       // Public marketing page is the default route for all platforms.
       initialRoute: '/',
       routes: {
@@ -112,6 +116,34 @@ class _AppRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPop(route, previousRoute);
     if (previousRoute != null) _update(previousRoute);
+  }
+}
+
+class _TitleObserver extends RouteObserver<PageRoute<dynamic>> {
+  void _set(PageRoute<dynamic> route) {
+    final name = route.settings.name ?? '';
+    String title = 'Project Bridge';
+    if (name == '/admin') title = 'Contractor · Project Bridge';
+    if (name == '/client') title = 'Client · Project Bridge';
+    if (name == '/projects') title = 'Projects · Project Bridge';
+    if (name == '/project') title = 'Project Details · Project Bridge';
+    // Best-effort: set document title for web only.
+    title_helper.setDocumentTitle(title);
+  }
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    super.didPush(route, previousRoute);
+    if (route is PageRoute) _set(route);
+  }
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute is PageRoute) _set(newRoute);
+  }
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (previousRoute is PageRoute) _set(previousRoute);
   }
 }
 

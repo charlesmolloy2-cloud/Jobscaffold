@@ -6,6 +6,7 @@ import '../../models/project.dart';
 import '../../state/dummy_data.dart';
 import '../../services/firestore_repository.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/error_banner.dart';
 
 class ClientJobsPage extends StatelessWidget {
 	const ClientJobsPage({super.key});
@@ -59,7 +60,12 @@ class ClientJobsPage extends StatelessWidget {
 			);
 			final repo = context.read<FirestoreRepository?>();
 			if (repo != null) {
-				await repo.createProjectWithId(id, project);
+				try {
+					await repo.createProjectWithId(id, project);
+				} catch (e) {
+					// ignore: use_build_context_synchronously
+					ScaffoldMessenger.of(context).showMaterialBanner(appErrorBanner(context, message: 'Failed to create job', onRetry: () {}));
+				}
 			}
 			appState.addProject(project);
 		}
@@ -118,10 +124,14 @@ class ClientJobsPage extends StatelessWidget {
 									assignedCustomerId: p.assignedCustomerId,
 									assignedContractorId: p.assignedContractorId,
 								);
-								final repo = context.read<FirestoreRepository?>();
-								if (repo != null) {
-									await repo.updateProject(updated);
-								}
+																					final repo = context.read<FirestoreRepository?>();
+																					if (repo != null) {
+																						try {
+																							await repo.updateProject(updated);
+																						} catch (e) {
+																							ScaffoldMessenger.of(context).showMaterialBanner(appErrorBanner(context, message: 'Failed to save changes', onRetry: () {}));
+																						}
+																					}
 								appState.updateProject(updated);
 						},
 						onDelete: () async {
@@ -136,13 +146,18 @@ class ClientJobsPage extends StatelessWidget {
 									],
 								),
 							);
-							if (confirm == true) {
-								final repo = context.read<FirestoreRepository?>();
-								if (repo != null) {
-									await repo.deleteProject(p.id);
-								}
-								appState.removeProject(p.id);
-							}
+																	if (confirm == true) {
+																		final repo = context.read<FirestoreRepository?>();
+																		if (repo != null) {
+																			try {
+																				await repo.deleteProject(p.id);
+																			} catch (e) {
+																				ScaffoldMessenger.of(context).showMaterialBanner(appErrorBanner(context, message: 'Failed to delete job', onRetry: () {}));
+																				return;
+																			}
+																		}
+																		appState.removeProject(p.id);
+																	}
 						},
 						);
 					},
@@ -163,7 +178,14 @@ class ClientJobsPage extends StatelessWidget {
 		if (repo != null) {
 			return StreamBuilder<List<Project>>(
 				stream: repo.watchProjectsForCustomer(customerId),
-				builder: (context, snap) => buildJobs(snap.data ?? localJobs),
+				builder: (context, snap) {
+					if (snap.hasError) {
+						WidgetsBinding.instance.addPostFrameCallback((_) {
+							ScaffoldMessenger.of(context).showMaterialBanner(appErrorBanner(context, message: 'Failed to load jobs', onRetry: () {}));
+						});
+					}
+					return buildJobs(snap.data ?? localJobs);
+				},
 			);
 		}
 		return buildJobs(localJobs);

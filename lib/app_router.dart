@@ -7,6 +7,7 @@ import 'state/app_state.dart';
 
 class AppRouterDelegate extends RouterDelegate<RouteSettings>
 		with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteSettings> {
+	@override
 	final GlobalKey<NavigatorState> navigatorKey;
 	final AppState appState;
 
@@ -32,7 +33,7 @@ class AppRouterDelegate extends RouterDelegate<RouteSettings>
 				else
 					const MaterialPage(child: NotFoundPage()),
 			],
-			onPopPage: (route, result) => route.didPop(result),
+			onDidRemovePage: (route) {},
 		);
 	}
 
@@ -44,12 +45,13 @@ class AppRouteInformationParser extends RouteInformationParser<RouteSettings> {
 		@override
 		Future<RouteSettings> parseRouteInformation(
 				RouteInformation routeInformation) async {
-			final uri = Uri.parse(routeInformation.location);
+			final uri = routeInformation.uri;
 			return RouteSettings(name: uri.path);
 		}
 
 	@override
 	RouteInformation? restoreRouteInformation(RouteSettings configuration) {
-		return RouteInformation(location: configuration.name);
+		final name = configuration.name ?? '/';
+		return RouteInformation(uri: Uri.parse(name));
 	}
 }

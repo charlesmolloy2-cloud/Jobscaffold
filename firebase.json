@@ -1,1 +1,56 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"project-bridge-cm","appId":"1:525011825099:android:c406640c64280dcb71864e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"project-bridge-cm","configurations":{"android":"1:525011825099:android:c406640c64280dcb71864e","web":"1:525011825099:web:6e29b898c7b830a071864e"}}}}}}
+{
+	"flutter": {
+		"platforms": {
+			"android": {
+				"default": {
+					"projectId": "project-bridge-cm",
+					"appId": "1:525011825099:android:c406640c64280dcb71864e",
+					"fileOutput": "android/app/google-services.json"
+				}
+			},
+			"dart": {
+				"lib/firebase_options.dart": {
+					"projectId": "project-bridge-cm",
+					"configurations": {
+						"android": "1:525011825099:android:c406640c64280dcb71864e",
+						"web": "1:525011825099:web:6e29b898c7b830a071864e"
+					}
+				}
+			}
+		}
+	},
+	"hosting": {
+		"public": "build/web",
+		"ignore": [
+			"firebase.json",
+			"**/.*",
+			"**/node_modules/**"
+		],
+		"rewrites": [
+			{ "source": "**", "destination": "/index.html" }
+		],
+		"headers": [
+			{
+				"source": "**/*.@(js|css|wasm)",
+				"headers": [
+					{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+				]
+			},
+			{
+				"source": "**/*.@(png|jpg|jpeg|gif|svg|webp)",
+				"headers": [
+					{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+				]
+			},
+			{
+				"source": "/index.html",
+				"headers": [
+					{ "key": "Cache-Control", "value": "no-cache" }
+				]
+			}
+		]
+	},
+	"firestore": {
+		"rules": "firestore.rules"
+	}
+}
