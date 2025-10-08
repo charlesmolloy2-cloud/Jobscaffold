@@ -62,7 +62,8 @@ class _MessagingPageState extends State<MessagingPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab-messaging',
         onPressed: () => _addOrEditMessage(),
         child: const Icon(Icons.add_comment),
         tooltip: 'Start New Chat',

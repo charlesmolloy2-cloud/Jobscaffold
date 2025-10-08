@@ -55,6 +55,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             .toList(),
       ),
       floatingActionButton: FloatingActionButton(
+          heroTag: 'fab-projects',
         onPressed: _addProject,
         child: const Icon(Icons.add),
         tooltip: 'Add Project',

@@ -64,7 +64,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab-analytics',
         onPressed: () => _addOrEditStat(),
         child: const Icon(Icons.bar_chart),
         tooltip: 'Add Stat',

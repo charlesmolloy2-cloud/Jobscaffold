@@ -11,6 +11,71 @@
 				"$dart-build_runner"
 			],
 			"group": "build"
+		},
+		{
+			"label": "flutter_run_chrome",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome"
+			]
+		},
+		{
+			"label": "Flutter: Hot reload (Chrome)",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"--no-pub",
+				"--machine",
+				"attach",
+				"-d",
+				"chrome"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Flutter: Run Chrome",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Flutter: Hot restart",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Flutter: Run Chrome",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

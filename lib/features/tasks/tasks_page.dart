@@ -63,6 +63,7 @@ class _TasksPageState extends State<TasksPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab-tasks',
         onPressed: () => _addOrEditTask(),
         child: const Icon(Icons.add),
         tooltip: 'Add Task',

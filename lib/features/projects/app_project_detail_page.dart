@@ -6,14 +6,25 @@ import '../../models/project.dart' as app_models;
 import '../../models/update.dart' as app_updates;
 import 'package:intl/intl.dart';
 import '../../widgets/error_banner.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppProjectDetailPage extends StatelessWidget {
   const AppProjectDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final projectId = (args is Map && args['projectId'] is String) ? args['projectId'] as String : null;
+    final route = ModalRoute.of(context);
+    final args = route?.settings.arguments;
+    String? projectId = (args is Map && args['projectId'] is String) ? args['projectId'] as String : null;
+    // Support deep links like /project/<id>
+    if (projectId == null) {
+      final name = route?.settings.name ?? '';
+      if (name.startsWith('/project/')) {
+        projectId = name.substring('/project/'.length);
+      }
+    }
     final appState = context.watch<AppState>();
     final repo = context.read<FirestoreRepository?>();
     if (projectId == null) {
@@ -34,7 +45,7 @@ class AppProjectDetailPage extends StatelessWidget {
             );
           });
         }
-        final project = snap.data ?? _findLocalProject(appState, projectId);
+  final project = snap.data ?? _findLocalProject(appState, projectId!);
         if (project == null) {
           return Scaffold(
             appBar: AppBar(title: const Text('Project')),
@@ -49,6 +60,27 @@ class AppProjectDetailPage extends StatelessWidget {
       appBar: AppBar(
   title: Text(p.title),
         actions: [
+          IconButton(
+            tooltip: 'Share link',
+            icon: const Icon(Icons.share),
+            onPressed: () async {
+              final base = Uri.base; // current URL
+              final shareUrl = Uri(
+                scheme: base.scheme,
+                host: base.host,
+                port: base.hasPort ? base.port : null,
+                path: '/project/${p.id}',
+              ).toString();
+              try {
+                await Clipboard.setData(ClipboardData(text: shareUrl));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied to clipboard')));
+                }
+              } catch (_) {}
+              // Fire analytics event
+              try { await FirebaseAnalytics.instance.logShare(contentType: 'project', itemId: p.id, method: 'clipboard'); } catch (_) {}
+            },
+          ),
           PopupMenuButton<String>(
             onSelected: (value) async {
               String newStatus = p.status;
@@ -155,6 +187,7 @@ class AppProjectDetailPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          _ConsentBanner(),
           Card(
             child: ListTile(
               leading: const Icon(Icons.place),
@@ -280,5 +313,65 @@ app_models.Project? _findLocalProject(AppState appState, String id) {
     return appState.activeProjects.firstWhere((p) => p.id == id);
   } catch (_) {
     return null;
+  }
+}
+
+class _ConsentBanner extends StatefulWidget {
+  @override
+  State<_ConsentBanner> createState() => _ConsentBannerState();
+}
+
+class _ConsentBannerState extends State<_ConsentBanner> {
+  bool _decided = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final decided = prefs.getBool('analytics_consent_decided') ?? false;
+      setState(() => _decided = decided);
+    } catch (_) {}
+  }
+
+  Future<void> _setConsent(bool allowed) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('analytics_consent_decided', true);
+      await prefs.setBool('analytics_consent_allowed', allowed);
+      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(allowed);
+      setState(() => _decided = true);
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_decided) return const SizedBox.shrink();
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Analytics consent', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            const Text('We use anonymous analytics to improve the app. You can opt out any time in settings.'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                TextButton(onPressed: () => _setConsent(false), child: const Text('Decline')),
+                const SizedBox(width: 8),
+                ElevatedButton(onPressed: () => _setConsent(true), child: const Text('Allow')),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

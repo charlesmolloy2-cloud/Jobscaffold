@@ -10,6 +10,7 @@ import 'state/app_state.dart';
 import 'state/dummy_data.dart';
 import 'theme/app_theme.dart';
 import 'services/firestore_repository.dart';
+import 'features/projects/app_project_detail_page.dart';
 
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 final _AppRouteObserver _routeObserver = _AppRouteObserver();
@@ -57,6 +58,33 @@ class MyApp extends StatelessWidget {
         ...generatedRoutes,
         // Developer route index moved under /routes to avoid hijacking '/'
         '/routes': (_) => const RouteIndex(),
+      },
+      onGenerateRoute: (settings) {
+        final name = settings.name ?? '';
+        if (name.startsWith('/project/')) {
+          final id = name.substring('/project/'.length);
+          return MaterialPageRoute(
+            settings: RouteSettings(name: settings.name, arguments: {'projectId': id}),
+            builder: (_) => const AppProjectDetailPage(),
+            maintainState: true,
+          );
+        }
+        // Tab-level deep links for client and contractor dashboards
+        if (name == '/client' || name.startsWith('/client/')) {
+          return MaterialPageRoute(
+            settings: RouteSettings(name: name),
+            builder: (context) => generatedRoutes['/client']!(context),
+            maintainState: true,
+          );
+        }
+        if (name == '/admin' || name.startsWith('/admin/')) {
+          return MaterialPageRoute(
+            settings: RouteSettings(name: name),
+            builder: (context) => generatedRoutes['/admin']!(context),
+            maintainState: true,
+          );
+        }
+        return null;
       },
       onUnknownRoute: (s) => MaterialPageRoute(
         settings: s, // preserve the original RouteSettings (including name)
@@ -125,8 +153,18 @@ class _TitleObserver extends RouteObserver<PageRoute<dynamic>> {
     String title = 'Project Bridge';
     if (name == '/admin') title = 'Contractor · Project Bridge';
     if (name == '/client') title = 'Client · Project Bridge';
+    if (name.startsWith('/admin/')) {
+      final seg = name.substring('/admin/'.length);
+      final tab = seg.isEmpty ? 'Home' : seg[0].toUpperCase() + seg.substring(1);
+      title = 'Contractor · $tab · Project Bridge';
+    }
+    if (name.startsWith('/client/')) {
+      final seg = name.substring('/client/'.length);
+      final tab = seg.isEmpty ? 'Home' : seg[0].toUpperCase() + seg.substring(1);
+      title = 'Client · $tab · Project Bridge';
+    }
     if (name == '/projects') title = 'Projects · Project Bridge';
-    if (name == '/project') title = 'Project Details · Project Bridge';
+    if (name == '/project' || name.startsWith('/project/')) title = 'Project Details · Project Bridge';
     // Best-effort: set document title for web only.
     title_helper.setDocumentTitle(title);
   }

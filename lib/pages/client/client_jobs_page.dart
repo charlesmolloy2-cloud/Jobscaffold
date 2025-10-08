@@ -166,6 +166,7 @@ class ClientJobsPage extends StatelessWidget {
 					right: 16,
 					bottom: 16,
 					child: FloatingActionButton(
+						heroTag: 'client-jobs-fab',
 						onPressed: createJobRequest,
 						tooltip: 'Request a job',
 						child: const Icon(Icons.add),

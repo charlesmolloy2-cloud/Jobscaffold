@@ -64,6 +64,7 @@ class _FilesPageState extends State<FilesPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab-files',
         onPressed: () => _addOrEditFile(),
         child: const Icon(Icons.upload_file),
         tooltip: 'Upload File',

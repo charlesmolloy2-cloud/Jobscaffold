@@ -62,7 +62,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab-notifications',
         onPressed: () => _addOrEditNotification(),
         child: const Icon(Icons.add_alert),
         tooltip: 'Add Notification',

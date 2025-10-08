@@ -63,7 +63,8 @@ class _ESignaturePageState extends State<ESignaturePage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab-esign',
         onPressed: () => _addOrEditRequest(),
         child: const Icon(Icons.edit_document),
         tooltip: 'Request Signature',

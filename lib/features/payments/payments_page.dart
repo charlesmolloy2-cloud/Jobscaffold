@@ -64,7 +64,8 @@ class _PaymentsPageState extends State<PaymentsPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab-payments',
         onPressed: () => _addOrEditInvoice(),
         child: const Icon(Icons.receipt_long),
         tooltip: 'Create Invoice',

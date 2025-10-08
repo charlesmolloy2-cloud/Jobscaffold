@@ -65,7 +65,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrEditFeedback(),
+          heroTag: 'fab-feedback',
+          onPressed: () => _addOrEditFeedback(),
         child: const Icon(Icons.rate_review),
         tooltip: 'Leave Feedback',
       ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/project.dart';
 import '../services/firestore_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class ProjectCard extends StatelessWidget {
 	final Project project;
@@ -97,14 +98,30 @@ class ProjectCard extends StatelessWidget {
 							),
 							trailing: (onEdit != null || onDelete != null)
 									? PopupMenuButton<String>(
-									onSelected: (value) {
-										if (value == 'edit' && onEdit != null) onEdit!();
-										if (value == 'edit_details') _editDetails(context);
-										if (value == 'delete' && onDelete != null) onDelete!();
-									},
+																onSelected: (value) async {
+																		if (value == 'edit' && onEdit != null) onEdit!();
+																		if (value == 'edit_details') _editDetails(context);
+																		if (value == 'delete' && onDelete != null) onDelete!();
+																		if (value == 'copy_link') {
+																			final base = Uri.base;
+																			final url = Uri(
+																				scheme: base.scheme,
+																				host: base.host,
+																				port: base.hasPort ? base.port : null,
+																				path: '/project/${project.id}',
+																			).toString();
+																			try {
+																				// ignore: deprecated_member_use
+																				await Clipboard.setData(ClipboardData(text: url));
+																				// ignore: use_build_context_synchronously
+																				ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied to clipboard')));
+																			} catch (_) {}
+																		}
+																},
 									itemBuilder: (_) => [
 										if (onEdit != null) const PopupMenuItem(value: 'edit', child: Text('Edit')),
 										const PopupMenuItem(value: 'edit_details', child: Text('Edit details')),
+																		const PopupMenuItem(value: 'copy_link', child: Text('Copy link')),
 										if (onDelete != null) const PopupMenuItem(value: 'delete', child: Text('Delete')),
 									],
 								)

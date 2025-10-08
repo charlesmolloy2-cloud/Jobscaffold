@@ -30,11 +30,32 @@ class ClientHomePage extends StatelessWidget {
     }
     final user = FirebaseAuth.instance.currentUser;
     final appState = context.read<AppState>();
+    // Determine initial tab from the route name if deep-linked (e.g., /client/calendar)
+    final routeName = ModalRoute.of(context)?.settings.name ?? '';
+    int initialTab = 0;
+    if (routeName.startsWith('/client/')) {
+      final seg = routeName.substring('/client/'.length);
+      switch (seg) {
+        case 'jobs':
+          initialTab = 0; break;
+        case 'calendar':
+          initialTab = 1; break;
+        case 'updates':
+          initialTab = 2; break;
+        case 'photos':
+          initialTab = 3; break;
+        case 'account':
+          initialTab = 4; break;
+      }
+    }
     if (user == null && appState.devBypassRole != 'client') {
       Future.microtask(() => Navigator.pushReplacementNamed(context, '/client_signin'));
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return AppNavScaffold(
+      includeMoreTab: true,
+      moreTabIndex: 5 - 1, // place More just left of Account
+      bottomNavIconSize: 22,
       tabs: [
         ClientJobsPage(),
         CalendarPage(),
@@ -49,6 +70,7 @@ class ClientHomePage extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: 'Photos'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
       ],
+      initialIndex: initialTab,
       appBarTitles: const [
         'Jobs',
         'Calendar',
@@ -56,6 +78,19 @@ class ClientHomePage extends StatelessWidget {
         'Photos',
         'Account',
       ],
+      onTabChanged: (i) {
+        String path = '/client';
+        switch (i) {
+          case 0: path = '/client/jobs'; break;
+          case 1: path = '/client/calendar'; break;
+          case 2: path = '/client/updates'; break;
+          case 3: path = '/client/photos'; break;
+          case 4: path = '/client/account'; break;
+        }
+        if (ModalRoute.of(context)?.settings.name != path) {
+          Navigator.of(context).pushReplacementNamed(path);
+        }
+      },
       appBarActions: [
         Builder(
           builder: (context) {
@@ -112,6 +147,14 @@ class ClientHomePage extends StatelessWidget {
           ),
         ),
       ),
+      floatingActionButtons: const [
+        // Jobs tab: request job (smaller action kept per-page for client)
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
     );
   }
 }

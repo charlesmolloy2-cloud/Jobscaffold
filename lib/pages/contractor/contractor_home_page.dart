@@ -35,6 +35,26 @@ class ContractorHomePage extends StatelessWidget {
     _maybeShowWelcome(context);
     final user = FirebaseAuth.instance.currentUser;
     final appState = context.read<AppState>();
+    // Determine initial tab from the route name if deep-linked (e.g., /admin/projects)
+    final routeName = ModalRoute.of(context)?.settings.name ?? '';
+    int initialTab = 0;
+    if (routeName.startsWith('/admin/')) {
+      final seg = routeName.substring('/admin/'.length);
+      switch (seg) {
+        case 'jobs':
+          initialTab = 0; break;
+        case 'projects':
+          initialTab = 1; break;
+        case 'calendar':
+          initialTab = 2; break;
+        case 'updates':
+          initialTab = 3; break;
+        case 'photos':
+          initialTab = 4; break;
+        case 'account':
+          initialTab = 5; break;
+      }
+    }
     if (user == null && appState.devBypassRole != 'contractor') {
       // Redirect to sign in if not authenticated
       // Use Future.microtask to avoid setState during build
@@ -44,6 +64,9 @@ class ContractorHomePage extends StatelessWidget {
       );
     }
     return AppNavScaffold(
+      includeMoreTab: true,
+      moreTabIndex: 6 - 1, // insert More just left of Account (index 5 among 6 tabs)
+      bottomNavIconSize: 22,
       tabs: [
         ContractorJobsPage(),
         ContractorProjectsPage(),
@@ -60,6 +83,7 @@ class ContractorHomePage extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: 'Photos'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
       ],
+      initialIndex: initialTab,
       appBarTitles: const [
         'Jobs',
         'Projects',
@@ -68,6 +92,21 @@ class ContractorHomePage extends StatelessWidget {
         'Photos',
         'Account',
       ],
+      onTabChanged: (i) {
+        String path = '/admin';
+        switch (i) {
+          case 0: path = '/admin/jobs'; break;
+          case 1: path = '/admin/projects'; break;
+          case 2: path = '/admin/calendar'; break;
+          case 3: path = '/admin/updates'; break;
+          case 4: path = '/admin/photos'; break;
+          case 5: path = '/admin/account'; break;
+        }
+        // Replace route to avoid piling history when just switching tabs
+        if (ModalRoute.of(context)?.settings.name != path) {
+          Navigator.of(context).pushReplacementNamed(path);
+        }
+      },
       appBarActions: [
         Builder(
           builder: (context) {
@@ -105,34 +144,45 @@ class ContractorHomePage extends StatelessWidget {
           },
         ),
       ],
-      topBanner: FadeIn(
-        child: Material(
-          color: Colors.green.withOpacity(0.08),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const Icon(Icons.verified_user, size: 18, color: Colors.green),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Signed in as ${user?.displayName ?? user?.email ?? user?.uid ?? 'Developer Bypass'}',
-                    overflow: TextOverflow.ellipsis,
+      // Show banner only on the Jobs tab (index 0); hide it on other tabs.
+      topBanners: [
+        FadeIn(
+          child: Material(
+            color: Colors.green.withOpacity(0.08),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.verified_user, size: 18, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Employee: ${user?.displayName ?? user?.email ?? user?.uid ?? 'Developer Bypass'}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () => showCreateContractorJobDialog(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('ADD NEW PROJECT'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButtons: const [
-        FloatingActionButton(onPressed: null, child: Icon(Icons.add)),
-        FloatingActionButton(onPressed: null, child: Icon(Icons.add)),
-        FloatingActionButton(onPressed: null, child: Icon(Icons.event)),
+        null,
+        null,
         null,
         null,
         null,
       ],
+      // No bottom FAB here; the action is moved into the top banner for visibility.
     );
   }
 }

@@ -15,9 +15,9 @@ service cloud.firestore {
 
     match /projects/{projectId} {
       // Read allowed if the user is assigned to the project
-      allow get, list: if false; // disallow broad listing; use filtered queries client-side
       allow get: if isProjectMember(resource);
-      allow list: if false; // prevent collection-wide scans
+      // Allow list (queries) when every returned doc is for a project the user belongs to
+      allow list: if isSignedIn() && isProjectMember(resource);
 
       // Create allowed if the new doc assigns the caller as customer or contractor
       allow create: if isSignedIn() && (
