@@ -1,4 +1,4 @@
-﻿name: project_bridge
+name: project_bridge
 description: Project Bridge app
 publish_to: "none"
 version: 1.0.0+1
@@ -21,6 +21,8 @@ dependencies:
   shared_preferences: ^2.2.3
   url_strategy: ^0.3.0
   intl: ^0.19.0
+  cloud_functions: ^6.0.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

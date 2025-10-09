@@ -40,5 +40,12 @@ service cloud.firestore {
       allow create: if isSignedIn() &&
         isProjectMember(get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)));
     }
+
+    // Invoices owned by a user. Only the owner can read/write their invoices.
+    match /invoices/{invoiceId} {
+      allow read, list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
   }
 }

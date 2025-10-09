@@ -127,29 +127,38 @@ class ClientHomePage extends StatelessWidget {
           },
         ),
       ],
-      topBanner: FadeIn(
-        child: Material(
-          color: Colors.blue.withOpacity(0.08),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const Icon(Icons.verified_user, size: 18, color: Colors.blue),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Signed in as ${user?.displayName ?? user?.email ?? user?.uid ?? 'Developer Bypass'}',
-                    overflow: TextOverflow.ellipsis,
+      topBanners: [
+        // Jobs tab: show prominent Request Job banner like contractor
+        FadeIn(
+          child: Material(
+            color: Colors.green.withOpacity(0.08),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.verified_user, size: 18, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Customer: ${user?.displayName ?? user?.email ?? user?.uid ?? 'Developer Bypass'}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () => showCreateClientJobDialog(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('REQUEST JOB'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButtons: const [
-        // Jobs tab: request job (smaller action kept per-page for client)
-        null,
         null,
         null,
         null,

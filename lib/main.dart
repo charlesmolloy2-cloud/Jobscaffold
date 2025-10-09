@@ -51,16 +51,30 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,
       navigatorKey: _navigatorKey,
   navigatorObservers: <NavigatorObserver>[_routeObserver, _TitleObserver()],
-      // Public marketing page is the default route for all platforms.
-      initialRoute: '/',
+    // Honor flutter --route by using platform defaultRouteName; fallback to '/'
+    initialRoute: WidgetsBinding.instance.platformDispatcher.defaultRouteName.isNotEmpty
+      ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+      : '/',
       routes: {
         // Ensure generated routes can't override our index route ('/').
         ...generatedRoutes,
         // Developer route index moved under /routes to avoid hijacking '/'
         '/routes': (_) => const RouteIndex(),
+        '/payments/success': (_) => const _PaymentResultScreen(success: true),
+        '/payments/cancel': (_) => const _PaymentResultScreen(success: false),
       },
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';
+        // Stripe Checkout returns with query params, e.g. /payments/success?session_id=...
+        if (name.startsWith('/payments/')) {
+          final uri = Uri.tryParse(name);
+          final isSuccess = uri?.pathSegments.contains('success') ?? name.contains('/payments/success');
+          return MaterialPageRoute(
+            settings: RouteSettings(name: name),
+            builder: (_) => _PaymentResultScreen(success: isSuccess),
+            maintainState: true,
+          );
+        }
         if (name.startsWith('/project/')) {
           final id = name.substring('/project/'.length);
           return MaterialPageRoute(
@@ -246,6 +260,32 @@ class NotFoundScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Not Found')),
       body: Center(child: Text('Route "$routeName" is not registered.')),
+    );
+  }
+}
+
+class _PaymentResultScreen extends StatelessWidget {
+  final bool success;
+  const _PaymentResultScreen({required this.success});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(success ? 'Payment Success' : 'Payment Canceled')),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(success ? Icons.check_circle : Icons.cancel, size: 64, color: success ? Colors.green : Colors.red),
+            const SizedBox(height: 16),
+            Text(success ? 'Thank you! Your payment was successful.' : 'Payment was canceled.'),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => Navigator.popUntil(context, (r) => r.settings.name == '/admin' || r.settings.name == '/client' || r.isFirst),
+              child: const Text('Back to app'),
+            )
+          ],
+        ),
+      ),
     );
   }
 }

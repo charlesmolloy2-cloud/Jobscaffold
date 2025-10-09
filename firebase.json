@@ -27,6 +27,7 @@
 			"**/node_modules/**"
 		],
 		"rewrites": [
+			{ "source": "/api/stripe/webhook", "function": "stripeWebhook" },
 			{ "source": "**", "destination": "/index.html" }
 		],
 		"headers": [
@@ -52,5 +53,9 @@
 	},
 	"firestore": {
 		"rules": "firestore.rules"
+	},
+	"functions": {
+		"source": "functions",
+		"runtime": "nodejs18"
 	}
 }
