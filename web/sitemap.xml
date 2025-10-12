@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://example.com/</loc>
-  </url>
-  <url>
-    <loc>https://example.com/client</loc>
-  </url>
-  <url>
-    <loc>https://example.com/admin</loc>
-  </url>
-  <url>
-    <loc>https://example.com/payments/success</loc>
-  </url>
-  <url>
-    <loc>https://example.com/payments/cancel</loc>
-  </url>
+  <url><loc>https://project-bridge-cm.web.app/</loc></url>
+  <url><loc>https://project-bridge-cm.web.app/client</loc></url>
+  <url><loc>https://project-bridge-cm.web.app/admin</loc></url>
+  <url><loc>https://project-bridge-cm.web.app/payments/success</loc></url>
+  <url><loc>https://project-bridge-cm.web.app/payments/cancel</loc></url>
 </urlset>
