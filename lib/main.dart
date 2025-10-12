@@ -3,6 +3,8 @@ import 'package:url_strategy/url_strategy.dart';
 import 'utils/title_helper_stub.dart' if (dart.library.html) 'utils/title_helper_web.dart' as title_helper;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'generated_routes.dart';
@@ -24,6 +26,20 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+  }
+  // If running locally (e.g., on localhost), connect to Firebase Emulators
+  try {
+    final host = Uri.base.host; // works on web and mobile
+    if (host == 'localhost' || host == '127.0.0.1') {
+      // Auth emulator
+      await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+      // Firestore emulator
+      FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+      // Functions emulator (default region us-central1)
+      FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
+    }
+  } catch (_) {
+    // No-op: emulator setup is best-effort and only for local development
   }
   runApp(
     MultiProvider(

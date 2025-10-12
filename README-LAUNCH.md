@@ -22,3 +22,11 @@ IMPORTANT: Deploying Cloud Functions requires the Firebase Blaze (pay‑as‑you
 - Implement full webhook signature verification (already supported if you set `stripe.webhook`).
 - Add Terms/Privacy pages and link from the app (e.g., More tab).
 - Run Lighthouse and fix any quick wins.
+
+## Local end-to-end with Firebase Emulators (no Blaze required)
+1. Start emulators (from project root):
+   - `firebase emulators:start --only auth,firestore,functions,hosting`
+2. Run the Flutter app (web):
+   - `flutter run -d chrome`
+3. The app detects localhost and connects to emulators automatically (Auth:9099, Firestore:8080, Functions:5001, Hosting:5000).
+4. To test Functions locally with Stripe, use the Stripe CLI to forward events to the local webhook if desired.
