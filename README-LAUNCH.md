@@ -8,6 +8,8 @@
 3. Deploy:
    - `npm run deploy` from `functions/` or `firebase deploy --only functions` from repo root.
 
+IMPORTANT: Deploying Cloud Functions requires the Firebase Blaze (pay‑as‑you‑go) plan. Upgrade the project in Firebase Console → Usage and billing before deploying. Hosting on web.app does not require Blaze, only Functions do.
+
 ## Build and deploy web
 1. `flutter build web --release`
 2. `firebase deploy --only hosting`
