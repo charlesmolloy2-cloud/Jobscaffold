@@ -68,6 +68,17 @@ class MoreMenu extends StatelessWidget {
           title: const Text('File Sharing'),
           onTap: () => Navigator.pushNamed(context, '/files'),
         ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.privacy_tip_outlined),
+          title: const Text('Privacy Policy'),
+          onTap: () => Navigator.pushNamed(context, '/privacy'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.description_outlined),
+          title: const Text('Terms of Service'),
+          onTap: () => Navigator.pushNamed(context, '/terms'),
+        ),
       ],
     );
   }

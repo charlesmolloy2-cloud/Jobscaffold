@@ -12,7 +12,7 @@ class PaymentsPage extends StatefulWidget {
 }
 
 class _PaymentsPageState extends State<PaymentsPage> {
-  final List<_Invoice> _invoices = [];
+  final List<_Invoice> _invoices = []; // local fallback only when not signed in
 
   void _addOrEditInvoice([_Invoice? invoice, int? index]) async {
     final result = await showDialog<_Invoice>(
@@ -40,12 +40,12 @@ class _PaymentsPageState extends State<PaymentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Payments & Invoicing')),
-      body: ListView.builder(
-        itemCount: _invoices.length,
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    Widget buildList(List<_Invoice> invoices) {
+      return ListView.builder(
+        itemCount: invoices.length,
         itemBuilder: (context, i) {
-          final inv = _invoices[i];
+          final inv = invoices[i];
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
@@ -62,7 +62,13 @@ class _PaymentsPageState extends State<PaymentsPage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteInvoice(i),
+                    onPressed: () async {
+                      if (inv.docId != null) {
+                        await FirebaseFirestore.instance.collection('invoices').doc(inv.docId).delete();
+                      } else {
+                        _deleteInvoice(i);
+                      }
+                    },
                   ),
                   IconButton(
                     tooltip: 'Collect Payment',
@@ -74,9 +80,62 @@ class _PaymentsPageState extends State<PaymentsPage> {
             ),
           );
         },
-      ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'fab-payments',
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Payments & Invoicing')),
+      body: uid == null
+          ? buildList(_invoices)
+          : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('invoices')
+                  .where('userId', isEqualTo: uid)
+                  .orderBy('updatedAt', descending: true)
+                  .snapshots(),
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snap.hasError) {
+                  return Center(child: Text('Failed to load invoices: ${snap.error}'));
+                }
+                final invoices = (snap.data?.docs ?? [])
+                    .map((d) {
+                      final m = d.data();
+                      return _Invoice(
+                        title: (m['title'] ?? '') as String,
+                        description: (m['description'] ?? '') as String,
+                        amount: (m['amount'] is num) ? (m['amount'] as num).toDouble() : 0.0,
+                        docId: d.id,
+                        status: (m['status'] ?? 'pending') as String,
+                      );
+                    })
+                    .toList();
+                return invoices.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.receipt_long, size: 48, color: Colors.grey),
+                              const SizedBox(height: 12),
+                              const Text('No invoices yet'),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () => _addOrEditInvoice(),
+                                child: const Text('Create invoice'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : buildList(invoices);
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'fab-payments',
         onPressed: () => _addOrEditInvoice(),
         child: const Icon(Icons.receipt_long),
         tooltip: 'Create Invoice',

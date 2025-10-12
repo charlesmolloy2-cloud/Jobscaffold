@@ -25,6 +25,8 @@ import 'features/feedback/feedback_page.dart';
 import 'features/esignature/esignature_page.dart';
 import 'features/projects/projects.dart';
 import 'features/projects/app_project_detail_page.dart';
+import 'pages/common/privacy_page.dart';
+import 'pages/common/terms_page.dart';
 
 // Export a single map of route name to builder. Keep '/' reserved for the index in main.dart
 final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
@@ -54,4 +56,6 @@ final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
   '/esignature': (_) => const ESignaturePage(),
   '/projects': (_) => const ProjectsScreen(),
   '/project': (_) => const AppProjectDetailPage(),
+  '/privacy': (_) => const PrivacyPage(),
+  '/terms': (_) => const TermsPage(),
 };
