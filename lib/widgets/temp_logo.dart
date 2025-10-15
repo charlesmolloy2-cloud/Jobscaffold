@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 class TempLogo extends StatelessWidget {
   final double size;
   final String text;
-  const TempLogo({super.key, this.size = 28, this.text = 'Project Bridge'});
+  const TempLogo({super.key, this.size = 28, this.text = 'Site bench'});
 
   @override
   Widget build(BuildContext context) {

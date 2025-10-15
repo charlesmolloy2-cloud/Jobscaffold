@@ -1,5 +1,7 @@
-﻿import 'package:flutter/material.dart';
+﻿// SiteBench: A platform for project clarity between contractor and client
+import 'package:flutter/material.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'utils/title_helper_stub.dart' if (dart.library.html) 'utils/title_helper_web.dart' as title_helper;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,9 +25,17 @@ Future<void> main() async {
   setPathUrlStrategy();
   // Avoid double-initialization during hot restart/web.
   if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    if (kIsWeb) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.web);
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // On iOS, prefer using GoogleService-Info.plist bundled with the app
+      // so teams don't need to regenerate firebase_options.dart immediately.
+      await Firebase.initializeApp();
+    } else {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
   }
   // If running locally (e.g., on localhost), connect to Firebase Emulators
   try {
@@ -63,8 +73,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Project Bridge',
+      title: 'Site bench',
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.dark,
       navigatorKey: _navigatorKey,
   navigatorObservers: <NavigatorObserver>[_routeObserver, _TitleObserver()],
     // Honor flutter --route by using platform defaultRouteName; fallback to '/'
@@ -131,7 +143,7 @@ class RouteIndex extends StatelessWidget {
   Widget build(BuildContext context) {
     final routes = generatedRoutes.keys.toList()..sort();
     return Scaffold(
-      appBar: AppBar(title: const Text('Project Bridge')),
+  appBar: AppBar(title: const Text('Site bench')),
       body: routes.isEmpty
           ? const Center(child: Text('No screens with zero-arg constructors found.'))
           : ListView(
@@ -180,21 +192,21 @@ class _AppRouteObserver extends RouteObserver<PageRoute<dynamic>> {
 class _TitleObserver extends RouteObserver<PageRoute<dynamic>> {
   void _set(PageRoute<dynamic> route) {
     final name = route.settings.name ?? '';
-    String title = 'Project Bridge';
-    if (name == '/admin') title = 'Contractor · Project Bridge';
-    if (name == '/client') title = 'Client · Project Bridge';
+  String title = 'Site bench';
+  if (name == '/admin') title = 'Contractor · Site bench';
+  if (name == '/client') title = 'Client · Site bench';
     if (name.startsWith('/admin/')) {
       final seg = name.substring('/admin/'.length);
       final tab = seg.isEmpty ? 'Home' : seg[0].toUpperCase() + seg.substring(1);
-      title = 'Contractor · $tab · Project Bridge';
+  title = 'Contractor · $tab · Site bench';
     }
     if (name.startsWith('/client/')) {
       final seg = name.substring('/client/'.length);
       final tab = seg.isEmpty ? 'Home' : seg[0].toUpperCase() + seg.substring(1);
-      title = 'Client · $tab · Project Bridge';
+  title = 'Client · $tab · Site bench';
     }
-    if (name == '/projects') title = 'Projects · Project Bridge';
-    if (name == '/project' || name.startsWith('/project/')) title = 'Project Details · Project Bridge';
+  if (name == '/projects') title = 'Projects · Site bench';
+  if (name == '/project' || name.startsWith('/project/')) title = 'Project Details · Site bench';
     // Best-effort: set document title for web only.
     title_helper.setDocumentTitle(title);
   }

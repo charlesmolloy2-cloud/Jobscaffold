@@ -67,18 +67,27 @@ Future<void> showCreateClientJobDialog(BuildContext context) async {
 													crossAxisAlignment: CrossAxisAlignment.stretch,
 													children: [
 														TextFormField(
-															controller: titleCtrl,
-															decoration: const InputDecoration(labelText: 'Title'),
-															validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter a title' : null,
+																controller: titleCtrl,
+																decoration: const InputDecoration(
+																	labelText: 'Title',
+																	alignLabelWithHint: true,
+																),
+																validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter a title' : null,
 														),
 														TextFormField(
-															controller: addressCtrl,
-															decoration: const InputDecoration(labelText: 'Address'),
+																controller: addressCtrl,
+																decoration: const InputDecoration(
+																	labelText: 'Address',
+																	alignLabelWithHint: true,
+																),
 														),
 														TextFormField(
-															controller: descCtrl,
-															decoration: const InputDecoration(labelText: 'Description'),
-															maxLines: 4,
+																controller: descCtrl,
+																decoration: const InputDecoration(
+																	labelText: 'Description',
+																	alignLabelWithHint: true,
+																),
+																maxLines: 4,
 														),
 														Row(
 															children: [

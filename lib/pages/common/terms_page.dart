@@ -15,7 +15,7 @@ class TermsPage extends StatelessWidget {
           ),
           SizedBox(height: 12),
           Text(
-            'This is a placeholder Terms of Service for the Project Bridge web app.\n\n'
+            'This is a placeholder Terms of Service for the Site bench web app.\n\n'
             '• Use of the service is subject to these terms.\n'
             '• You agree to provide accurate information.\n'
             '• Payments and refunds are processed via Stripe.\n\n'

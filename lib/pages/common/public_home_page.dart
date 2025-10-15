@@ -5,6 +5,7 @@ import '../../widgets/fade_in.dart';
 import '../../widgets/slide_fade_in.dart';
 import '../../widgets/temp_logo.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/blueprint_background.dart';
 import 'package:provider/provider.dart';
 import '../../state/app_state.dart';
 
@@ -149,9 +150,11 @@ class _PublicHomePageState extends State<PublicHomePage> {
                 ),
               ),
             ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
+      body: BlueprintBackground(
+        padding: const EdgeInsets.only(top: 0),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             FadeIn(delay: const Duration(milliseconds: 50), child: KeyedSubtree(key: _heroKey, child: _HeroSection(isWide: isWide))),
@@ -168,6 +171,7 @@ class _PublicHomePageState extends State<PublicHomePage> {
             const SizedBox(height: 48),
             const _Footer(),
           ],
+          ),
         ),
       ),
     );
@@ -253,7 +257,7 @@ class _HeroSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 72),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [kGreen, kLightGreenBg],
+          colors: [kSteelBlue, kDarkGray],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -322,10 +326,10 @@ class _WhatIsSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              Text('What is Project Bridge?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+              Text('What is Site bench?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
               SizedBox(height: 12),
               Text(
-                'Project Bridge is a simple way to plan, track, and complete home projects together. '
+                'Site bench is a simple way to plan, track, and complete home projects together. '
                 'Customers get transparency and peace of mind. Contractors get tools to communicate, organize, '
                 'and deliver great results — on time.',
                 style: TextStyle(fontSize: 17, height: 1.5),
@@ -398,7 +402,7 @@ class _Feature extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: kGreenDark, size: 28),
+            Icon(icon, color: kSteelBlue, size: 28),
             const SizedBox(height: 10),
             Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
@@ -416,7 +420,7 @@ class _TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final testimonials = const [
-      _Testimonial(name: 'Alex R.', role: 'Homeowner', quote: 'Project Bridge made my remodel stress-free. I always knew what was happening.'),
+  _Testimonial(name: 'Alex R.', role: 'Homeowner', quote: 'Site bench made my remodel stress-free. I always knew what was happening.'),
       _Testimonial(name: 'Casey M.', role: 'Contractor', quote: 'Scheduling, updates, and invoicing in one place — my crew loves it.'),
       _Testimonial(name: 'Jordan S.', role: 'Homeowner', quote: 'Transparent progress and easy payments. Highly recommend.'),
     ];
@@ -627,9 +631,9 @@ class _Footer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const TempLogo(size: 22, text: 'Project Bridge'),
+          const TempLogo(size: 22, text: 'Site bench'),
           const SizedBox(height: 8),
-          Text('© ${DateTime.now().year} Project Bridge', style: const TextStyle(color: Colors.white70)),
+          Text('© ${DateTime.now().year} Site bench', style: const TextStyle(color: Colors.white70)),
         ],
       ),
     );

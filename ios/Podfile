@@ -1,0 +1,41 @@
+# CocoaPods Podfile for Flutter iOS project
+platform :ios, '13.0'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+install! 'cocoapods', :warn_for_unused_master_specs_repo => false
+
+# Workaround for CocoaPods CDN issue
+source 'https://cdn.cocoapods.org/'
+
+flutter_root = File.expand_path('..', File.join(__FILE__, '..'))
+load File.join(flutter_root, 'Flutter', 'podhelper.rb')
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # Ensure iOS 13 minimum for all pods
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    end
+  end
+end

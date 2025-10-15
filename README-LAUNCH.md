@@ -1,4 +1,4 @@
-# Web Launch Checklist (Project Bridge)
+# Web Launch Checklist (Site bench)
 
 ## Configure payments (Stripe + Firebase Functions)
 1. In the `functions` folder, run `npm install`.

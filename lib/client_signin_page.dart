@@ -76,7 +76,7 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Welcome back',
+                    'Welcome back to SiteBench',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
@@ -104,7 +104,7 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
                     icon: _signingIn
                         ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.login),
-                    label: const Text('Sign In as Customer'),
+                    label: const Text('Enter SiteBench'),
                   ),
                   const SizedBox(height: 8),
                   TextButton(
