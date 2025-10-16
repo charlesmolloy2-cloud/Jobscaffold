@@ -78,7 +78,6 @@ class _CalendarPageState extends State<CalendarPage> {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Calendar')),
       body: Container(
         width: double.infinity,
         height: double.infinity,
