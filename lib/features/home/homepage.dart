@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-  title: const Text('Site bench Home'),
+  title: const Text('JobScaffold Home'),
       ),
       body: Center(
         child: Column(

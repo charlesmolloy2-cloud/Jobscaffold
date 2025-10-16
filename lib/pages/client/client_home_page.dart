@@ -24,7 +24,7 @@ class ClientHomePage extends StatelessWidget {
             ? u!.displayName
             : (u?.email?.trim().isNotEmpty == true ? u!.email : u?.uid);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Welcome back to SiteBench${name != null ? ', $name' : '!'}')),
+          SnackBar(content: Text('Welcome back to JobScaffold${name != null ? ', $name' : '!'}')),
         );
       });
     }

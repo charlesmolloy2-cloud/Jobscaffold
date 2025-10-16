@@ -1,11 +1,11 @@
-# iOS Firebase Setup (SiteBench)
+# iOS Firebase Setup (JobScaffold)
 
 This project uses the Firebase project `project-bridge-cm`.
 
 ## 1) Add GoogleService-Info.plist
 - Download from Firebase Console → Project Settings → iOS app.
 - Place the file at: `ios/Runner/GoogleService-Info.plist`.
-- Ensure the bundle ID matches `PRODUCT_BUNDLE_IDENTIFIER` in Xcode (currently `com.example.sitebench`). Update both if you change it.
+- Ensure the bundle ID matches `PRODUCT_BUNDLE_IDENTIFIER` in Xcode (currently `com.example.jobscaffold`). Update both if you change it.
 
 ## 2) URL Schemes (Optional if using Auth/Links)
 - Open `ios/Runner/Info.plist` in Xcode.

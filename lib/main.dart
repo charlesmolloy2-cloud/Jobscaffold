@@ -1,4 +1,4 @@
-﻿// SiteBench: A platform for project clarity between contractor and client
+﻿// JobScaffold: A platform for project clarity between contractor and client
 import 'package:flutter/material.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
@@ -15,6 +15,16 @@ import 'state/dummy_data.dart';
 import 'theme/app_theme.dart';
 import 'services/firestore_repository.dart';
 import 'features/projects/app_project_detail_page.dart';
+import 'pages/common/how_to_create_job.dart';
+import 'pages/common/how_to_use_jobs.dart';
+import 'pages/common/how_to_use_messaging.dart';
+import 'pages/common/how_to_use_calendar.dart';
+import 'pages/common/how_to_use_payments.dart';
+import 'pages/common/how_to_use_tasks.dart';
+import 'pages/common/how_to_use_notifications.dart';
+import 'pages/common/how_to_use_files.dart';
+import 'pages/common/how_to_use_feedback.dart';
+import 'pages/common/how_to_use_profile.dart';
 
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 final _AppRouteObserver _routeObserver = _AppRouteObserver();
@@ -73,7 +83,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Site bench',
+  title: 'JobScaffold',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
@@ -90,6 +100,16 @@ class MyApp extends StatelessWidget {
         '/routes': (_) => const RouteIndex(),
         '/payments/success': (_) => const _PaymentResultScreen(success: true),
         '/payments/cancel': (_) => const _PaymentResultScreen(success: false),
+  '/how_to_create_job': (_) => const HowToCreateJobPage(),
+  '/how_to_use_jobs': (_) => const HowToUseJobsPage(),
+  '/how_to_use_messaging': (_) => const HowToUseMessagingPage(),
+  '/how_to_use_calendar': (_) => const HowToUseCalendarPage(),
+  '/how_to_use_payments': (_) => const HowToUsePaymentsPage(),
+  '/how_to_use_tasks': (_) => const HowToUseTasksPage(),
+  '/how_to_use_notifications': (_) => const HowToUseNotificationsPage(),
+  '/how_to_use_files': (_) => const HowToUseFilesPage(),
+  '/how_to_use_feedback': (_) => const HowToUseFeedbackPage(),
+  '/how_to_use_profile': (_) => const HowToUseProfilePage(),
       },
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';
@@ -143,7 +163,7 @@ class RouteIndex extends StatelessWidget {
   Widget build(BuildContext context) {
     final routes = generatedRoutes.keys.toList()..sort();
     return Scaffold(
-  appBar: AppBar(title: const Text('Site bench')),
+  appBar: AppBar(title: const Text('JobScaffold')),
       body: routes.isEmpty
           ? const Center(child: Text('No screens with zero-arg constructors found.'))
           : ListView(
@@ -192,21 +212,21 @@ class _AppRouteObserver extends RouteObserver<PageRoute<dynamic>> {
 class _TitleObserver extends RouteObserver<PageRoute<dynamic>> {
   void _set(PageRoute<dynamic> route) {
     final name = route.settings.name ?? '';
-  String title = 'Site bench';
-  if (name == '/admin') title = 'Contractor · Site bench';
-  if (name == '/client') title = 'Client · Site bench';
+  String title = 'JobScaffold';
+  if (name == '/admin') title = 'Contractor · JobScaffold';
+  if (name == '/client') title = 'Client · JobScaffold';
     if (name.startsWith('/admin/')) {
       final seg = name.substring('/admin/'.length);
       final tab = seg.isEmpty ? 'Home' : seg[0].toUpperCase() + seg.substring(1);
-  title = 'Contractor · $tab · Site bench';
+  title = 'Contractor · $tab · JobScaffold';
     }
     if (name.startsWith('/client/')) {
       final seg = name.substring('/client/'.length);
       final tab = seg.isEmpty ? 'Home' : seg[0].toUpperCase() + seg.substring(1);
-  title = 'Client · $tab · Site bench';
+  title = 'Client · $tab · JobScaffold';
     }
-  if (name == '/projects') title = 'Projects · Site bench';
-  if (name == '/project' || name.startsWith('/project/')) title = 'Project Details · Site bench';
+  if (name == '/projects') title = 'Projects · JobScaffold';
+  if (name == '/project' || name.startsWith('/project/')) title = 'Project Details · JobScaffold';
     // Best-effort: set document title for web only.
     title_helper.setDocumentTitle(title);
   }

@@ -75,6 +75,56 @@ class MoreMenu extends StatelessWidget {
           onTap: () => Navigator.pushNamed(context, '/privacy'),
         ),
         ListTile(
+          leading: const Icon(Icons.help_outline),
+          title: const Text('How to Create a Job'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_create_job'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.work_outline),
+          title: const Text('How to Use Jobs'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_jobs'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.chat_bubble_outline),
+          title: const Text('How to Use Messaging'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_messaging'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.calendar_today_outlined),
+          title: const Text('How to Use Calendar'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_calendar'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.payment_outlined),
+          title: const Text('How to Use Payments & Invoicing'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_payments'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.check_box_outlined),
+          title: const Text('How to Use Tasks & Checklists'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_tasks'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.notifications_outlined),
+          title: const Text('How to Use Notifications'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_notifications'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.attach_file_outlined),
+          title: const Text('How to Use File Sharing'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_files'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.feedback_outlined),
+          title: const Text('How to Use Feedback & Ratings'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_feedback'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.person_outline),
+          title: const Text('How to Use Profile & Settings'),
+          onTap: () => Navigator.pushNamed(context, '/how_to_use_profile'),
+        ),
+        ListTile(
           leading: const Icon(Icons.description_outlined),
           title: const Text('Terms of Service'),
           onTap: () => Navigator.pushNamed(context, '/terms'),

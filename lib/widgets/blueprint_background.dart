@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// SiteBench: A platform for project clarity between contractor and client
+// JobScaffold: A platform for project clarity between contractor and client
 // Subtle blueprint grid background for hero sections or full-page wraps.
 class BlueprintBackground extends StatelessWidget {
   final Widget child;

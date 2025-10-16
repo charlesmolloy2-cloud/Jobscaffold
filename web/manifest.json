@@ -1,6 +1,6 @@
 {
-    "name": "Project Bridge",
-    "short_name": "Project Bridge",
+    "name": "JobScaffold",
+    "short_name": "JobScaffold",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0b1a2a",

@@ -1,6 +1,6 @@
-// SiteBench: A platform for project clarity between contractor and client
+// JobScaffold: A platform for project clarity between contractor and client
 // lib/home_page.dart
-// Flutter Home Page for Site bench
+// Flutter Home Page for JobScaffold
 // - Admin sign-in
 // - Client sign-in
 // - Programmer bypass for Customer and Contractor
@@ -134,7 +134,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-  title: const Text('SiteBench Projects'),
+  title: const Text('JobScaffold Projects'),
         actions: [
           IconButton(
             tooltip: 'Toggle programmer bypass',
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            Text('Welcome to SiteBench — The Jobsite, Organized.',
+            Text('Welcome to JobScaffold — The Jobsite, Organized.',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
             SizedBox(height: 8),
             Text(

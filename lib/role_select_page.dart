@@ -14,7 +14,7 @@ class RoleSelectPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Welcome to SiteBench – Let’s Get to Work.',
+                'Welcome to JobScaffold – Let’s Get to Work.',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),

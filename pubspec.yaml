@@ -1,5 +1,5 @@
-name: project_bridge
-description: Site bench app
+name: job_scaffold
+description: JobScaffold app
 publish_to: "none"
 version: 1.0.0+1
 

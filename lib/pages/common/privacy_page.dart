@@ -15,7 +15,7 @@ class PrivacyPage extends StatelessWidget {
           ),
           SizedBox(height: 12),
           Text(
-            'This is a placeholder privacy policy for the Site bench web app.\n\n'
+            'This is a placeholder privacy policy for the JobScaffold web app.\n\n'
             '• We collect profile information you provide (name, email).\n'
             '• We process project data you create (jobs, updates, files).\n'
             '• We use Firebase for authentication and data storage.\n'

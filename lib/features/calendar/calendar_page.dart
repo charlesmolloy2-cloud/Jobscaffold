@@ -1,4 +1,5 @@
 
+
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
@@ -9,13 +10,21 @@ class CalendarPage extends StatefulWidget {
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
+class _CalendarEvent {
+  String title;
+  String description;
+  DateTime date;
+  _CalendarEvent({required this.title, required this.description, required this.date});
+}
+
 class _CalendarPageState extends State<CalendarPage> {
   final List<_CalendarEvent> _events = [];
+  DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
-  void _addEvent([_CalendarEvent? event, int? index]) async {
+  void _addEvent([_CalendarEvent? event, int? index, DateTime? date]) async {
     final result = await showDialog<_CalendarEvent>(
       context: context,
-      builder: (context) => _EventDialog(event: event),
+      builder: (context) => _EventDialog(event: event, initialDate: date ?? _focusedMonth),
     );
     if (result != null) {
       setState(() {
@@ -34,8 +43,40 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  List<_CalendarEvent> _eventsForDay(DateTime day) {
+    return _events.where((e) =>
+      e.date.year == day.year && e.date.month == day.month && e.date.day == day.day
+    ).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+    final lastDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0);
+    final daysInMonth = lastDayOfMonth.day;
+    final firstWeekday = firstDayOfMonth.weekday;
+    final weeks = <List<DateTime?>>[];
+    int day = 1;
+    for (int w = 0; w < 6; w++) {
+      final week = <DateTime?>[];
+      for (int d = 1; d <= 7; d++) {
+        if (w == 0 && d < firstWeekday) {
+          week.add(null);
+        } else if (day > daysInMonth) {
+          week.add(null);
+        } else {
+          week.add(DateTime(_focusedMonth.year, _focusedMonth.month, day));
+          day++;
+        }
+      }
+      weeks.add(week);
+    }
+
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
     return Scaffold(
       appBar: AppBar(title: const Text('Calendar')),
       body: Container(
@@ -48,84 +89,138 @@ class _CalendarPageState extends State<CalendarPage> {
             end: Alignment.bottomRight,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 24),
-                Icon(Icons.calendar_today, size: 64, color: kGreenDark),
-                const SizedBox(height: 16),
-                const Text(
-                  'Project Calendar',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: kBlack),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'View all your project milestones, meetings, and deadlines in one place.',
-                          style: TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(),
-                        const SizedBox(height: 8),
-                        if (_events.isEmpty)
-                          const Text('No events yet. Add your first event!'),
-                        if (_events.isNotEmpty)
-                          ..._events.asMap().entries.map((entry) {
-                            final i = entry.key;
-                            final e = entry.value;
-                            return Card(
-                              color: Colors.white,
-                              margin: const EdgeInsets.symmetric(vertical: 6),
-                              child: ListTile(
-                                title: Text(e.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text('${e.date.toLocal()}\n${e.description}'),
-                                isThreeLine: true,
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: kGreenDark),
-                                      onPressed: () => _addEvent(e, i),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () => _deleteEvent(i),
-                                    ),
-                                  ],
-                                ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: () {
+                      setState(() {
+                        final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+                        if (prevMonth.year >= 2000) {
+                          _focusedMonth = prevMonth;
+                        }
+                      });
+                    },
+                  ),
+                  Text(
+                    '${monthNames[_focusedMonth.month - 1]} ${_focusedMonth.year}',
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed: () {
+                      setState(() {
+                        final nextMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+                        if (nextMonth.year <= 2100) {
+                          _focusedMonth = nextMonth;
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: const [
+                  Text('Mon'), Text('Tue'), Text('Wed'), Text('Thu'), Text('Fri'), Text('Sat'), Text('Sun'),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: weeks.length,
+                  itemBuilder: (context, w) {
+                    final week = weeks[w];
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: week.map((date) {
+                        if (date == null) {
+                          return Expanded(child: Container());
+                        }
+                        final isToday = date.year == today.year && date.month == today.month && date.day == today.day;
+                        final events = _eventsForDay(date);
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              _addEvent(null, null, date);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: isToday ? kGreen : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            );
-                          }).toList(),
-                      ],
-                    ),
+                              height: 48,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Text(
+                                    '${date.day}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: isToday ? kWhite : kBlack,
+                                    ),
+                                  ),
+                                  if (events.isNotEmpty)
+                                    Positioned(
+                                      bottom: 6,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_events.isNotEmpty)
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _events.length,
+                    itemBuilder: (context, i) {
+                      final e = _events[i];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          title: Text(e.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('${e.date.year}-${e.date.month.toString().padLeft(2, '0')}-${e.date.day.toString().padLeft(2, '0')}\n${e.description}'),
+                          isThreeLine: true,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: kGreenDark),
+                                onPressed: () => _addEvent(e, i, e.date),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _deleteEvent(i),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.event),
-                  label: const Text('Add Event'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kGreen,
-                    foregroundColor: kWhite,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () => _addEvent(),
-                ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
@@ -133,16 +228,10 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 }
 
-class _CalendarEvent {
-  String title;
-  String description;
-  DateTime date;
-  _CalendarEvent({required this.title, required this.description, required this.date});
-}
-
 class _EventDialog extends StatefulWidget {
   final _CalendarEvent? event;
-  const _EventDialog({this.event});
+  final DateTime initialDate;
+  const _EventDialog({this.event, required this.initialDate});
 
   @override
   State<_EventDialog> createState() => _EventDialogState();
@@ -158,7 +247,7 @@ class _EventDialogState extends State<_EventDialog> {
     super.initState();
     _titleController = TextEditingController(text: widget.event?.title ?? '');
     _descController = TextEditingController(text: widget.event?.description ?? '');
-    _date = widget.event?.date ?? DateTime.now();
+    _date = widget.event?.date ?? widget.initialDate;
   }
 
   @override

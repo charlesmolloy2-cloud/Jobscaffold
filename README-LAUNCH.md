@@ -1,4 +1,4 @@
-# Web Launch Checklist (Site bench)
+# Web Launch Checklist (JobScaffold)
 
 ## Configure payments (Stripe + Firebase Functions)
 1. In the `functions` folder, run `npm install`.

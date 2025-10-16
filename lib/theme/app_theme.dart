@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-// SiteBench: A builder-friendly, charcoal/slate UI with strong readable type.
+// JobScaffold: A builder-friendly, charcoal/slate UI with strong readable type.
 const Color kBlack = Color(0xFF0F0F0F);
 const Color kDarkGray = Color(0xFF1C1C1E); // Slate background
 const Color kGray = Color(0xFF2A2A2D);
@@ -14,7 +14,7 @@ const Color kSteelBlueDark = Color(0xFF1B5E93);
 const Color kAccentGreen = Color(0xFF1E9C55);
 
 // Legacy color aliases (compatibility with older UI code)
-// Map previous green/blue palette to SiteBench steel/charcoal palette.
+// Map previous green/blue palette to JobScaffold steel/charcoal palette.
 const Color kGreen = kSteelBlue;
 const Color kGreenDark = kSteelBlueDark;
 const Color kLightGreenBg = Color(0xFF22303A); // subtle slate-blue background
@@ -102,7 +102,7 @@ class AppTheme {
     );
   }
 
-  // Dark theme (default for SiteBench): charcoal backgrounds, steel accents.
+  // Dark theme (default for JobScaffold): charcoal backgrounds, steel accents.
   static ThemeData get dark {
     final scheme = ColorScheme(
       brightness: Brightness.dark,

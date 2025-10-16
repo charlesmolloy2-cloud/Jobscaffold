@@ -122,6 +122,29 @@ class _PublicHomePageState extends State<PublicHomePage> {
                       },
                     ),
                     ListTile(
+                      leading: const Icon(Icons.privacy_tip_outlined),
+                      title: const Text('Privacy Policy'),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Privacy Policy'),
+                            content: const SingleChildScrollView(
+                              child: Text(
+                                'JobScaffold respects your privacy.\n\nWe collect user account info, job/project data, and usage analytics. Data is used to provide app features, improve service, and send notifications. We do not sell your data. For full details, see our published privacy policy or contact support@jobscaffold.com.',
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
                       leading: const Icon(Icons.mail_outline),
                       title: const Text('Contact'),
                       onTap: () {
@@ -326,10 +349,10 @@ class _WhatIsSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              Text('What is Site bench?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+              Text('What is JobScaffold?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
               SizedBox(height: 12),
               Text(
-                'Site bench is a simple way to plan, track, and complete home projects together. '
+                'JobScaffold is a simple way to plan, track, and complete home projects together. '
                 'Customers get transparency and peace of mind. Contractors get tools to communicate, organize, '
                 'and deliver great results — on time.',
                 style: TextStyle(fontSize: 17, height: 1.5),
@@ -401,12 +424,24 @@ class _Feature extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: kSteelBlue, size: 28),
             const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 6),
-            Text(desc),
+            Flexible(
+              child: Text(
+                desc,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
       ),
@@ -420,7 +455,7 @@ class _TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final testimonials = const [
-  _Testimonial(name: 'Alex R.', role: 'Homeowner', quote: 'Site bench made my remodel stress-free. I always knew what was happening.'),
+  _Testimonial(name: 'Alex R.', role: 'Homeowner', quote: 'JobScaffold made my remodel stress-free. I always knew what was happening.'),
       _Testimonial(name: 'Casey M.', role: 'Contractor', quote: 'Scheduling, updates, and invoicing in one place — my crew loves it.'),
       _Testimonial(name: 'Jordan S.', role: 'Homeowner', quote: 'Transparent progress and easy payments. Highly recommend.'),
     ];
@@ -631,9 +666,9 @@ class _Footer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const TempLogo(size: 22, text: 'Site bench'),
+          const TempLogo(size: 22, text: 'JobScaffold'),
           const SizedBox(height: 8),
-          Text('© ${DateTime.now().year} Site bench', style: const TextStyle(color: Colors.white70)),
+          Text('© ${DateTime.now().year} JobScaffold', style: const TextStyle(color: Colors.white70)),
         ],
       ),
     );
