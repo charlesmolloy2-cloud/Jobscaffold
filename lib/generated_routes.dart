@@ -28,6 +28,7 @@ import 'features/projects/projects.dart';
 import 'features/projects/app_project_detail_page.dart';
 import 'pages/common/privacy_page.dart';
 import 'pages/common/terms_page.dart';
+import 'pages/common/demo_login_page.dart';
 
 // Export a single map of route name to builder. Keep '/' reserved for the index in main.dart
 final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
@@ -36,6 +37,7 @@ final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
   '/home': (_) => const HomePage(),
   '/': (_) => const PublicHomePage(),
   '/landing': (_) => const LandingPage(),
+  '/demo_login': (_) => const DemoLoginPage(),
   '/login': (_) => const LoginPage(),
   '/client_signin': (_) => const ClientSignInPage(),
   '/contractor_signin': (_) => const ContractorSignInPage(),
