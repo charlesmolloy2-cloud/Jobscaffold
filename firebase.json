@@ -27,7 +27,6 @@
 			"**/node_modules/**"
 		],
 		"rewrites": [
-			{ "source": "/stripe/webhook", "function": "stripeWebhook" },
 			{ "source": "**", "destination": "/index.html" }
 		],
 		"headers": [
