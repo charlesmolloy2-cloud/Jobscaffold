@@ -12,23 +12,30 @@ class DemoLoginPage extends StatefulWidget {
 }
 
 class _DemoLoginPageState extends State<DemoLoginPage> {
-  final _emailCtrl = TextEditingController(text: 'demo@jobscaffold.com');
-  final _passCtrl = TextEditingController(text: 'demo123');
+  final _userCtrl = TextEditingController(text: 'Admin1234');
+  final _passCtrl = TextEditingController(text: '1234');
   bool _obscure = true;
   String? _error;
+  UserRole _role = UserRole.contractor; // default
 
   void _signIn() {
-    final email = _emailCtrl.text.trim();
+    final username = _userCtrl.text.trim();
     final pass = _passCtrl.text;
-    if (email.isEmpty || pass.isEmpty) {
-      setState(() => _error = 'Please enter email and password.');
+    if (username.isEmpty || pass.isEmpty) {
+      setState(() => _error = 'Please enter username and password.');
       return;
     }
-    // Local demo sign-in only; does NOT call Firebase Auth.
-    final user = AppUser(id: 'demo', name: 'Demo Contractor', role: UserRole.contractor);
+    // Simple local demo gate
+    if (username != 'Admin1234' || pass != '1234') {
+      setState(() => _error = 'Invalid credentials. Use Admin1234 / 1234');
+      return;
+    }
+    final displayName = _role == UserRole.contractor ? 'Demo Contractor' : 'Demo Customer';
+    final user = AppUser(id: 'demo-${_role.name}', name: displayName, role: _role);
     context.read<AppState>().signInAs(user);
-    // Navigate to contractor dashboard
-    Navigator.of(context).pushNamedAndRemoveUntil('/admin', (r) => false);
+    // Navigate to chosen dashboard
+    final target = _role == UserRole.contractor ? '/admin' : '/client';
+    Navigator.of(context).pushNamedAndRemoveUntil(target, (r) => false);
   }
 
   @override
@@ -37,28 +44,52 @@ class _DemoLoginPageState extends State<DemoLoginPage> {
       appBar: AppBar(title: const Text('Demo Login')),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
+          constraints: const BoxConstraints(maxWidth: 480),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Sign in with a demo account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _emailCtrl,
-                  decoration: const InputDecoration(labelText: 'Email'),
+                const Text('Sign in with demo credentials', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                const Text('User: Admin1234    Password: 1234', style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _userCtrl,
+                        decoration: const InputDecoration(labelText: 'Username'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _passCtrl,
+                        obscureText: _obscure,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                            onPressed: () => setState(() => _obscure = !_obscure),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: _passCtrl,
-                  obscureText: _obscure,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () => setState(() => _obscure = !_obscure),
+                InputDecorator(
+                  decoration: const InputDecoration(labelText: 'Role'),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<UserRole>(
+                      value: _role,
+                      items: const [
+                        DropdownMenuItem(value: UserRole.contractor, child: Text('Contractor')),
+                        DropdownMenuItem(value: UserRole.client, child: Text('Customer')),
+                      ],
+                      onChanged: (v) => setState(() => _role = v ?? UserRole.contractor),
                     ),
                   ),
                 ),
