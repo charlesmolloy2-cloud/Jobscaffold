@@ -9,7 +9,7 @@ class LandingPage extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [kSteelBlue, kDarkBg],
+            colors: [kSteelBlue, kDarkGray],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

@@ -97,6 +97,16 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+  // Decide initial route:
+  // - On web, show the marketing Landing page when visiting the root URL.
+  // - Otherwise, honor the platform's defaultRouteName or fallback to '/'.
+  final platformDefaultRoute = WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+  final String initialRoute = kIsWeb
+    ? ((platformDefaultRoute.isEmpty || platformDefaultRoute == '/')
+      ? '/landing'
+      : platformDefaultRoute)
+    : (platformDefaultRoute.isNotEmpty ? platformDefaultRoute : '/');
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
   title: 'JobScaffold',
@@ -105,10 +115,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       navigatorKey: _navigatorKey,
   navigatorObservers: <NavigatorObserver>[_routeObserver, _TitleObserver()],
-    // Honor flutter --route by using platform defaultRouteName; fallback to '/'
-    initialRoute: WidgetsBinding.instance.platformDispatcher.defaultRouteName.isNotEmpty
-      ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
-      : '/',
+    // Honor flutter --route; on web, default to '/landing' at root
+    initialRoute: initialRoute,
       routes: {
         // Ensure generated routes can't override our index route ('/').
         ...generatedRoutes,
