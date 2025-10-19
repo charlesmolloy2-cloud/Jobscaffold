@@ -13,6 +13,7 @@ import 'pages/contractor/contractor_home_page.dart';
 // Common
 import 'pages/common/login_page.dart';
 import 'pages/common/public_home_page.dart';
+import 'pages/common/landing_page.dart';
 
 // Optional feature demo routes (standalone screens)
 import 'features/calendar/calendar_page.dart';
@@ -34,6 +35,7 @@ final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
   '/role_select': (_) => const RoleSelectPage(),
   '/home': (_) => const HomePage(),
   '/': (_) => const PublicHomePage(),
+  '/landing': (_) => const LandingPage(),
   '/login': (_) => const LoginPage(),
   '/client_signin': (_) => const ClientSignInPage(),
   '/contractor_signin': (_) => const ContractorSignInPage(),

@@ -29,6 +29,26 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
+
+flutter_icons:
+  android: true
+  ios: true
+  web: true
+  image_path: assets/icon/jobscaffold_icon.png
+  adaptive_icon_foreground: assets/icon/jobscaffold_icon.png
+  adaptive_icon_background: "#1C2A36"
+
+flutter_native_splash:
+  color: "#0F1720"
+  color_dark: "#0F1720"
+  android: true
+  ios: true
+  web: true
+  fullscreen: true
+  android_12:
+    icon_background_color: "#0F1720"
 
 flutter:
   uses-material-design: true

@@ -1,0 +1,1 @@
+Add your JobScaffold app icon here as jobscaffold_icon.png (1024x1024). This placeholder path is referenced by flutter_launcher_icons configuration in pubspec.yaml.
