@@ -1,4 +1,5 @@
 ﻿// JobScaffold: A platform for project clarity between contractor and client
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
@@ -7,6 +8,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'generated_routes.dart';
@@ -47,6 +50,19 @@ Future<void> main() async {
       );
     }
   }
+  // Initialize Firebase Analytics
+  FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+  
+  // Initialize Firebase Crashlytics (not available on web)
+  if (!kIsWeb) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    // Pass all uncaught asynchronous errors to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
+  
   // If running locally (e.g., on localhost), connect to Firebase Emulators
   try {
     final host = Uri.base.host; // works on web and mobile

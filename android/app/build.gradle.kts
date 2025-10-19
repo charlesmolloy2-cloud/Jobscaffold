@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.like_this1"
+    namespace = "com.jobscaffold.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,8 +22,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.like_this1"
+        // JobScaffold unique Application ID
+        applicationId = "com.jobscaffold.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -32,11 +32,20 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(project.property("KEYSTORE_FILE") as String? ?: "upload-keystore.jks")
+            storePassword = project.property("KEYSTORE_PASSWORD") as String? ?: ""
+            keyAlias = project.property("KEY_ALIAS") as String? ?: "upload"
+            keyPassword = project.property("KEY_PASSWORD") as String? ?: ""
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            minifyEnabled = true
+            shrinkResources = true
         }
     }
 }
