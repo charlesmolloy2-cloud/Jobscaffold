@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'state/app_state.dart';
 
@@ -41,14 +42,22 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _signingIn = true);
     try {
-      // TODO: Plug in real auth here (e.g., Firebase/Auth service)
-      await Future.delayed(const Duration(milliseconds: 600));
+      // Real Firebase Auth sign-in
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/client',
         (route) => false,
         arguments: const {'signedIn': true},
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? e.code)),
       );
     } catch (e) {
       if (!mounted) return;
@@ -62,6 +71,23 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    // If demo bypass is active, skip this screen entirely.
+    final demoBypass = context.watch<AppState>().devBypassRole;
+    if (demoBypass == 'client') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/client',
+          (route) => false,
+          arguments: const {'signedIn': true},
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Customer Sign In')),
       body: Center(

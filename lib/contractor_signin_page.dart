@@ -128,6 +128,24 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    // If demo bypass is active, skip this screen entirely.
+    final demoBypass = context.watch<AppState>().devBypassRole;
+    if (demoBypass == 'contractor') {
+      // Navigate to contractor dashboard after the current frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/admin',
+          (route) => false,
+          arguments: const {'signedIn': true},
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Contractor Sign In')),
       body: Center(
