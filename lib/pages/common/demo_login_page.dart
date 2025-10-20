@@ -30,9 +30,11 @@ class _DemoLoginPageState extends State<DemoLoginPage> {
       setState(() => _error = 'Invalid credentials. Use Admin1234 / 1234');
       return;
     }
-    final displayName = _role == UserRole.contractor ? 'Demo Contractor' : 'Demo Customer';
-    final user = AppUser(id: 'demo-${_role.name}', name: displayName, role: _role);
-    context.read<AppState>().signInAs(user);
+  final displayName = _role == UserRole.contractor ? 'Demo Contractor' : 'Demo Customer';
+  final user = AppUser(id: 'demo-${_role.name}', name: displayName, role: _role);
+  final appState = context.read<AppState>();
+  appState.signInAs(user);
+  appState.enableDevBypass(_role.name);
     // Navigate to chosen dashboard
     final target = _role == UserRole.contractor ? '/admin' : '/client';
     Navigator.of(context).pushNamedAndRemoveUntil(target, (r) => false);

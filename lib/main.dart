@@ -290,6 +290,7 @@ class _AuthRouteSyncState extends State<_AuthRouteSync> {
     _authStream.listen((user) {
       final appState = mounted ? context.read<AppState>() : null;
       final bypass = appState?.devBypassRole;
+      final hasLocalUser = (appState?.currentUser != null);
       final wasSignedIn = _lastUser != null;
       final isSignedIn = user != null;
       _lastUser = user;
@@ -298,7 +299,7 @@ class _AuthRouteSyncState extends State<_AuthRouteSync> {
       // - If signed out while on protected dashboards, send to home.
       // - If signed in while on sign-in screens, send to the corresponding dashboard.
       final routeName = _routeObserver.currentRouteName;
-      if (!isSignedIn && bypass == null) {
+      if (!isSignedIn && bypass == null && !hasLocalUser) {
         if (routeName == '/admin' || routeName == '/client') {
           _navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
         }
