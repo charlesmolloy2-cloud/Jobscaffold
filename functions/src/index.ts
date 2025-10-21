@@ -27,8 +27,8 @@ export const createCheckoutSession = functions.https.onCall(async (data, context
       throw new functions.https.HttpsError('invalid-argument', 'Amount must be a positive integer in the smallest currency unit');
     }
 
-    const successUrl = data?.successUrl || 'https://your-host.example.com/payments/success';
-    const cancelUrl = data?.cancelUrl || 'https://your-host.example.com/payments/cancel';
+    const successUrl = data?.successUrl || 'https://project-bridge-cm.web.app/payments/success';
+    const cancelUrl = data?.cancelUrl || 'https://project-bridge-cm.web.app/payments/cancel';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',

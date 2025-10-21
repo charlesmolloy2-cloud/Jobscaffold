@@ -274,9 +274,11 @@ flutter build ios --release
 
 ## 📞 Support & Next Steps
 
-- **Current live site:** https://project-bridge-cm.web.app
-- **Demo credentials:** Admin1234 / 1234 (choose Contractor or Customer)
+- **Live Site:** https://project-bridge-cm.web.app
+- **GitHub Repo:** https://github.com/charlesmolloy2-cloud/Jobscaffold
+- **Demo Login:** Admin1234 / 1234 (choose Contractor or Customer)
 - **Firebase Project:** project-bridge-cm
+- **Test Users:** contractor@jobscaffold.com, customer@jobscaffold.com
 
 **Ready to launch?**
 1. Complete Firebase Auth setup (5 min)

@@ -93,7 +93,7 @@ class ClientAccountPage extends StatelessWidget {
 										children: const [
 											Text('Contact info', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
 											SizedBox(height: 8),
-											Text('Email: client@example.com'),
+											Text('Email: demo@jobscaffold.com'),
 											SizedBox(height: 4),
 											Text('Phone: (555) 010-0101'),
 											SizedBox(height: 4),

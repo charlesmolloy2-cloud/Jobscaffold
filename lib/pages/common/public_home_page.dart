@@ -632,7 +632,7 @@ class _EmailCaptureState extends State<_EmailCapture> {
               controller: _email,
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
-                hintText: 'you@example.com',
+                hintText: 'your@email.com',
                 labelText: 'Email',
               ),
               validator: (v) {
