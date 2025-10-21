@@ -62,6 +62,17 @@ Future<void> main() async {
       return true;
     };
   }
+
+  // Initialize Push Notifications
+  try {
+    // Import notification service
+    // Note: This is commented out to avoid errors during initial setup
+    // Uncomment after adding VAPID key to notification_service.dart
+    // final notificationService = NotificationService();
+    // await notificationService.initialize();
+  } catch (e) {
+    print('Failed to initialize notifications: $e');
+  }
   
   // If running locally (e.g., on localhost), connect to Firebase Emulators
   try {
