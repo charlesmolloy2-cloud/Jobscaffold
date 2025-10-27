@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../services/time_tracking_service.dart';
 import '../../state/app_state.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
+import '../../services/pdf_service.dart';
 
 class TimeTrackingPage extends StatefulWidget {
   final String projectId;
@@ -640,11 +642,19 @@ class InvoicePreviewPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
-            onPressed: () {
-              // TODO: Generate PDF
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('PDF generation coming soon')),
-              );
+            onPressed: () async {
+              try {
+                // Generate PDF bytes
+                final bytes = await InvoicePdfService.generateInvoicePdf(invoiceData);
+                final fileName = 'invoice_${invoiceData.projectId}_${invoiceData.startDate.year}-${invoiceData.startDate.month.toString().padLeft(2, '0')}-${invoiceData.startDate.day.toString().padLeft(2, '0')}.pdf';
+                await Printing.sharePdf(bytes: bytes, filename: fileName);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('PDF error: $e')),
+                  );
+                }
+              }
             },
           ),
         ],
