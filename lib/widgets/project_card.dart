@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../features/budget/budget_page.dart';
 import '../features/material_orders/material_orders_page.dart';
 import '../features/before_after/before_after_page.dart';
+import '../features/tasks/kanban_board_page.dart';
 
 class ProjectCard extends StatelessWidget {
 	final Project project;
@@ -118,6 +119,13 @@ class ProjectCard extends StatelessWidget {
 																			),
 																		);
 																	}
+																if (value == 'tasks_kanban') {
+																	Navigator.of(context).push(
+																		MaterialPageRoute(
+																			builder: (_) => KanbanBoardPage(projectId: project.id),
+																		),
+																	);
+																}
 																	if (value == 'before_after') {
 																		Navigator.of(context).push(
 																			MaterialPageRoute(
@@ -142,11 +150,12 @@ class ProjectCard extends StatelessWidget {
 																			} catch (_) {}
 																		}
 																},
-									itemBuilder: (_) => [
+					 itemBuilder: (_) => [
 										   if (onEdit != null) const PopupMenuItem(value: 'edit', child: Text('Edit')),
 										   const PopupMenuItem(value: 'edit_details', child: Text('Edit details')),
 										   const PopupMenuItem(value: 'budget', child: Text('Budget')),
 										   const PopupMenuItem(value: 'material_orders', child: Text('Material Orders')),
+						 const PopupMenuItem(value: 'tasks_kanban', child: Text('Tasks (Kanban)')),
 														const PopupMenuItem(value: 'copy_link', child: Text('Copy link')),
 										   if (onDelete != null) const PopupMenuItem(value: 'delete', child: Text('Delete')),
 														const PopupMenuItem(value: 'material_orders', child: Text('Material Orders')),
