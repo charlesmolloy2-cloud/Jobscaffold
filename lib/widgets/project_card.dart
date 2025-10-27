@@ -4,6 +4,9 @@ import '../models/project.dart';
 import '../services/firestore_repository.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import '../features/budget/budget_page.dart';
+import '../features/material_orders/material_orders_page.dart';
+import '../features/before_after/before_after_page.dart';
 
 class ProjectCard extends StatelessWidget {
 	final Project project;
@@ -96,11 +99,32 @@ class ProjectCard extends StatelessWidget {
 																		),
 								],
 							),
-							trailing: (onEdit != null || onDelete != null)
+                            trailing: (onEdit != null || onDelete != null)
 									? PopupMenuButton<String>(
-																onSelected: (value) async {
+															onSelected: (value) async {
 																		if (value == 'edit' && onEdit != null) onEdit!();
 																		if (value == 'edit_details') _editDetails(context);
+																	if (value == 'budget') {
+																		Navigator.of(context).push(
+																			MaterialPageRoute(
+																				builder: (_) => BudgetPage(projectId: project.id, projectName: project.title),
+																			),
+																		);
+																	}
+																	if (value == 'material_orders') {
+																		Navigator.of(context).push(
+																			MaterialPageRoute(
+																				builder: (_) => MaterialOrdersPage(projectId: project.id),
+																			),
+																		);
+																	}
+																	if (value == 'before_after') {
+																		Navigator.of(context).push(
+																			MaterialPageRoute(
+																				builder: (_) => BeforeAfterPage(projectId: project.id),
+																			),
+																		);
+																	}
 																		if (value == 'delete' && onDelete != null) onDelete!();
 																		if (value == 'copy_link') {
 																			final base = Uri.base;
@@ -119,10 +143,14 @@ class ProjectCard extends StatelessWidget {
 																		}
 																},
 									itemBuilder: (_) => [
-										if (onEdit != null) const PopupMenuItem(value: 'edit', child: Text('Edit')),
-										const PopupMenuItem(value: 'edit_details', child: Text('Edit details')),
-																		const PopupMenuItem(value: 'copy_link', child: Text('Copy link')),
-										if (onDelete != null) const PopupMenuItem(value: 'delete', child: Text('Delete')),
+										   if (onEdit != null) const PopupMenuItem(value: 'edit', child: Text('Edit')),
+										   const PopupMenuItem(value: 'edit_details', child: Text('Edit details')),
+										   const PopupMenuItem(value: 'budget', child: Text('Budget')),
+										   const PopupMenuItem(value: 'material_orders', child: Text('Material Orders')),
+														const PopupMenuItem(value: 'copy_link', child: Text('Copy link')),
+										   if (onDelete != null) const PopupMenuItem(value: 'delete', child: Text('Delete')),
+														const PopupMenuItem(value: 'material_orders', child: Text('Material Orders')),
+														const PopupMenuItem(value: 'before_after', child: Text('Before/After')),
 									],
 								)
 								: null,
