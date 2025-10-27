@@ -4,15 +4,22 @@ import 'package:http/http.dart' as http;
 /// Weather service using OpenWeatherMap API
 /// Get your free API key at: https://openweathermap.org/api
 class WeatherService {
-  // TODO: Replace with your OpenWeatherMap API key
-  static const String _apiKey = 'YOUR_API_KEY_HERE';
+  // Read API key from --dart-define OWM_API_KEY; keep empty by default
+  static const String _apiKey = String.fromEnvironment('OWM_API_KEY', defaultValue: '');
   static const String _baseUrl = 'https://api.openweathermap.org/data/2.5';
+
+  void _requireApiKey() {
+    if (_apiKey.isEmpty) {
+      throw Exception('OpenWeather API key is missing. Provide it with --dart-define=OWM_API_KEY=YOUR_KEY');
+    }
+  }
 
   /// Get current weather for a location
   Future<WeatherData> getCurrentWeather({
     required double latitude,
     required double longitude,
   }) async {
+    _requireApiKey();
     final url = Uri.parse(
       '$_baseUrl/weather?lat=$latitude&lon=$longitude&appid=$_apiKey&units=imperial',
     );
@@ -32,6 +39,7 @@ class WeatherService {
     required double latitude,
     required double longitude,
   }) async {
+    _requireApiKey();
     final url = Uri.parse(
       '$_baseUrl/forecast?lat=$latitude&lon=$longitude&appid=$_apiKey&units=imperial',
     );
@@ -51,6 +59,7 @@ class WeatherService {
     required double latitude,
     required double longitude,
   }) async {
+    _requireApiKey();
     // Note: Alerts require One Call API 3.0 (paid) or One Call API 2.5 (free with registration)
     final url = Uri.parse(
       'https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&appid=$_apiKey&units=imperial',
