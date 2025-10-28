@@ -1,75 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../widgets/fade_in.dart';
-import '../../widgets/slide_fade_in.dart';
-import '../../widgets/temp_logo.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/blueprint_background.dart';
-import 'package:provider/provider.dart';
-import '../../state/app_state.dart';
-
-class PublicHomePage extends StatefulWidget {
-  const PublicHomePage({super.key});
-
-  @override
-  State<PublicHomePage> createState() => _PublicHomePageState();
-}
-
-class _PublicHomePageState extends State<PublicHomePage> {
-  final _scrollController = ScrollController();
-  final _heroKey = GlobalKey();
-  final _whatKey = GlobalKey();
-  final _featuresKey = GlobalKey();
-  final _contractorKey = GlobalKey();
-  final _testimonialsKey = GlobalKey();
-  final _ctaKey = GlobalKey();
-
-  Future<void> _scrollTo(GlobalKey key) async {
-    final ctx = key.currentContext;
-    if (ctx == null) return;
-    await Scrollable.ensureVisible(
-      ctx,
-      duration: const Duration(milliseconds: 450),
-      alignment: 0.1,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width >= 900;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const TempLogo(size: 28),
-        actions: [
-          if (isWide) ...[
-            TextButton(onPressed: () => _scrollTo(_whatKey), child: const Text('About')),
-            TextButton(onPressed: () => _scrollTo(_featuresKey), child: const Text('Features')),
-            TextButton(onPressed: () => _scrollTo(_contractorKey), child: const Text('Contractors')),
-            TextButton(onPressed: () => _scrollTo(_testimonialsKey), child: const Text('Testimonials')),
-            TextButton(onPressed: () => _scrollTo(_ctaKey), child: const Text('Contact')),
-            const VerticalDivider(width: 24),
-          ],
-          TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/contractor_signin'),
-            child: const Text('Contractor Login'),
-          ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/client_signin'),
-            child: const Text('Customer Login'),
-          ),
-          const SizedBox(width: 8),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'reduce_motion') {
-                final appState = context.read<AppState>();
-                appState.setReduceMotion(!appState.reduceMotion);
-              }
-            },
-            itemBuilder: (context) {
+// Removed: Old public splash page was retired.
+// The app now routes directly to LandingPage for web and provides Demo access on the landing and contractors pages.
               final reduce = context.select<AppState, bool>((s) => s.reduceMotion);
               return [
                 CheckedPopupMenuItem<String>(
@@ -88,6 +19,14 @@ class _PublicHomePageState extends State<PublicHomePage> {
               child: SafeArea(
                 child: ListView(
                   children: [
+                    ListTile(
+                      leading: const Icon(Icons.handyman_outlined),
+                      title: const Text('For Contractors'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/contractors');
+                      },
+                    ),
                     const ListTile(title: Text('Navigate')),
                     ListTile(
                       leading: const Icon(Icons.info_outline),
@@ -250,6 +189,14 @@ class _ContractorLoginSection extends StatelessWidget {
                       },
                       icon: const Icon(Icons.dashboard_outlined),
                       label: const Text('Contractor Dashboard'),
+                    ),
+                  ),
+                  SlideFadeIn(
+                    delay: const Duration(milliseconds: 170),
+                    child: TextButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/contractors'),
+                      icon: const Icon(Icons.star_outline),
+                      label: const Text('See contractor features'),
                     ),
                   ),
                   SlideFadeIn(

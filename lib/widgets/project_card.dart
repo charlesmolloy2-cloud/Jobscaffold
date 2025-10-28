@@ -8,6 +8,7 @@ import '../features/budget/budget_page.dart';
 import '../features/material_orders/material_orders_page.dart';
 import '../features/before_after/before_after_page.dart';
 import '../features/tasks/kanban_board_page.dart';
+import '../features/dashboard/project_dashboard_page.dart';
 
 class ProjectCard extends StatelessWidget {
 	final Project project;
@@ -126,6 +127,13 @@ class ProjectCard extends StatelessWidget {
 																		),
 																	);
 																}
+																if (value == 'dashboard') {
+																	Navigator.of(context).push(
+																		MaterialPageRoute(
+																			builder: (_) => ProjectDashboardPage(projectId: project.id, projectName: project.title),
+																		),
+																	);
+																}
 																	if (value == 'before_after') {
 																		Navigator.of(context).push(
 																			MaterialPageRoute(
@@ -155,12 +163,12 @@ class ProjectCard extends StatelessWidget {
 										   const PopupMenuItem(value: 'edit_details', child: Text('Edit details')),
 										   const PopupMenuItem(value: 'budget', child: Text('Budget')),
 										   const PopupMenuItem(value: 'material_orders', child: Text('Material Orders')),
-						 const PopupMenuItem(value: 'tasks_kanban', child: Text('Tasks (Kanban)')),
-														const PopupMenuItem(value: 'copy_link', child: Text('Copy link')),
+											 const PopupMenuItem(value: 'tasks_kanban', child: Text('Tasks (Kanban)')),
+										   const PopupMenuItem(value: 'dashboard', child: Text('Dashboard')),
+																const PopupMenuItem(value: 'copy_link', child: Text('Copy link')),
 										   if (onDelete != null) const PopupMenuItem(value: 'delete', child: Text('Delete')),
-														const PopupMenuItem(value: 'material_orders', child: Text('Material Orders')),
-														const PopupMenuItem(value: 'before_after', child: Text('Before/After')),
-									],
+																const PopupMenuItem(value: 'before_after', child: Text('Before/After')),
+								],
 								)
 								: null,
 						),
@@ -169,7 +177,6 @@ class ProjectCard extends StatelessWidget {
 				},
 			);
 	}
-
 	Future<void> _editDetails(BuildContext context) async {
 		final repo = context.read<FirestoreRepository?>();
 		if (repo == null) {

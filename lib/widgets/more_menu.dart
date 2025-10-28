@@ -68,6 +68,11 @@ class MoreMenu extends StatelessWidget {
           title: const Text('File Sharing'),
           onTap: () => Navigator.pushNamed(context, '/files'),
         ),
+        ListTile(
+          leading: const Icon(Icons.admin_panel_settings, color: Colors.orange),
+          title: const Text('Leads Admin'),
+          onTap: () => Navigator.pushNamed(context, '/leads_admin'),
+        ),
         const Divider(),
         ListTile(
           leading: const Icon(Icons.privacy_tip_outlined),

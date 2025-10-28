@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:provider/provider.dart';
 import 'state/app_state.dart';
@@ -17,6 +18,7 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
   final _password = TextEditingController();
   bool _busy = false;
   String? _error;
+  bool _rememberMe = true;
 
   @override
   void dispose() {
@@ -28,6 +30,17 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Load remembered email for contractors
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString('remember_email_contractor');
+      if (saved != null && mounted) {
+        setState(() {
+          _email.text = saved;
+          _rememberMe = true;
+        });
+      }
+    }();
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map && args['signedOut'] == true) {
       // Delay to ensure Scaffold is built
@@ -51,6 +64,15 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
         email: _email.text.trim(),
         password: _password.text,
       );
+      // Persist remembered email if opted in
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        if (_rememberMe) {
+          await prefs.setString('remember_email_contractor', _email.text.trim());
+        } else {
+          await prefs.remove('remember_email_contractor');
+        }
+      } catch (_) {}
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,
@@ -81,6 +103,14 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
         throw UnsupportedError('Google Sign-In is only wired for web in this demo');
       }
       if (!mounted) return;
+      // Save email if available and remember is ON
+      try {
+        final email = FirebaseAuth.instance.currentUser?.email;
+        if (email != null && _rememberMe) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('remember_email_contractor', email);
+        }
+      } catch (_) {}
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/admin',
@@ -111,6 +141,14 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
         throw UnsupportedError('Microsoft Sign-In is only wired for web in this demo');
       }
       if (!mounted) return;
+      // Save email if available and remember is ON
+      try {
+        final email = FirebaseAuth.instance.currentUser?.email;
+        if (email != null && _rememberMe) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('remember_email_contractor', email);
+        }
+      } catch (_) {}
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/admin',
@@ -128,6 +166,23 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    // If user is already authenticated, skip this screen entirely.
+    final current = FirebaseAuth.instance.currentUser;
+    if (current != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/admin',
+          (route) => false,
+          arguments: const {'signedIn': true},
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     // If demo bypass is active, skip this screen entirely.
     final demoBypass = context.watch<AppState>().devBypassRole;
     if (demoBypass == 'contractor') {
@@ -187,6 +242,29 @@ class _ContractorSignInPageState extends State<ContractorSignInPage> {
                         decoration: const InputDecoration(labelText: 'Password'),
                         validator: (v) => (v == null || v.isEmpty) ? 'Enter your password' : null,
                       ),
+                      CheckboxListTile(
+                        value: _rememberMe,
+                        onChanged: (v) => setState(() => _rememberMe = v ?? true),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Remember my email on this device'),
+                      ),
+                      if (_email.text.isNotEmpty)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () async {
+                              final prefs = await SharedPreferences.getInstance();
+                              await prefs.remove('remember_email_contractor');
+                              setState(() {
+                                _email.clear();
+                                _rememberMe = false;
+                              });
+                            },
+                            icon: const Icon(Icons.swap_horiz, size: 18),
+                            label: const Text('Switch account'),
+                          ),
+                        ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         onPressed: _busy ? null : _signInEmail,

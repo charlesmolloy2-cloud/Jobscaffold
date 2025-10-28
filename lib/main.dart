@@ -12,6 +12,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
+import 'services/notification_service.dart';
 import 'generated_routes.dart';
 import 'state/app_state.dart';
 import 'state/dummy_data.dart';
@@ -28,6 +29,7 @@ import 'pages/common/how_to_use_notifications.dart';
 import 'pages/common/how_to_use_files.dart';
 import 'pages/common/how_to_use_feedback.dart';
 import 'pages/common/how_to_use_profile.dart';
+import 'pages/common/admin_panel_page.dart';
 
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 final _AppRouteObserver _routeObserver = _AppRouteObserver();
@@ -65,12 +67,10 @@ Future<void> main() async {
 
   // Initialize Push Notifications
   try {
-    // Import notification service
-    // Note: This is commented out to avoid errors during initial setup
-    // Uncomment after adding VAPID key to notification_service.dart
-    // final notificationService = NotificationService();
-    // await notificationService.initialize();
+    final notificationService = NotificationService();
+    await notificationService.initialize();
   } catch (e) {
+    // Ignore failures to avoid blocking app startup
     print('Failed to initialize notifications: $e');
   }
   
@@ -109,13 +109,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
   // Decide initial route:
-  // - On web, show the marketing Landing page when visiting the root URL.
+  // - On web, go to '/' which we map to the Contractors page (no landing page).
   // - Otherwise, honor the platform's defaultRouteName or fallback to '/'.
   final platformDefaultRoute = WidgetsBinding.instance.platformDispatcher.defaultRouteName;
   final String initialRoute = kIsWeb
-    ? ((platformDefaultRoute.isEmpty || platformDefaultRoute == '/')
-      ? '/landing'
-      : platformDefaultRoute)
+    ? (platformDefaultRoute.isNotEmpty ? platformDefaultRoute : '/')
     : (platformDefaultRoute.isNotEmpty ? platformDefaultRoute : '/');
 
     return MaterialApp(
@@ -145,6 +143,7 @@ class MyApp extends StatelessWidget {
   '/how_to_use_files': (_) => const HowToUseFilesPage(),
   '/how_to_use_feedback': (_) => const HowToUseFeedbackPage(),
   '/how_to_use_profile': (_) => const HowToUseProfilePage(),
+  '/admin': (_) => const AdminPanelPage(),
       },
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';

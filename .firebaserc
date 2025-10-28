@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "project-bridge-cm"
-  }
+  },
+  "targets": {
+    "project-bridge-cm": {
+      "hosting": {
+        "legacy": [
+          "project-bridge-cm"
+        ],
+        "jobscaffold": [
+          "jobscaffold"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

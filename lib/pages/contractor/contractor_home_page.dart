@@ -10,6 +10,9 @@ import 'contractor_updates_page.dart';
 import 'contractor_account_page.dart';
 import 'contractor_photos_page.dart';
 import '../../features/calendar/calendar_page.dart';
+import '../../widgets/notifications_badge.dart';
+import '../../widgets/notification_bell.dart';
+import '../../features/analytics/analytics_page.dart';
 
 class ContractorHomePage extends StatelessWidget {
   const ContractorHomePage({super.key});
@@ -49,10 +52,12 @@ class ContractorHomePage extends StatelessWidget {
           initialTab = 2; break;
         case 'updates':
           initialTab = 3; break;
-        case 'photos':
+        case 'analytics':
           initialTab = 4; break;
-        case 'account':
+        case 'photos':
           initialTab = 5; break;
+        case 'account':
+          initialTab = 6; break;
       }
     }
     if (user == null && appState.devBypassRole != 'contractor') {
@@ -65,23 +70,25 @@ class ContractorHomePage extends StatelessWidget {
     }
     return AppNavScaffold(
       includeMoreTab: true,
-      moreTabIndex: 6 - 1, // insert More just left of Account (index 5 among 6 tabs)
+      moreTabIndex: 7 - 1, // insert More just left of Account (index 6 among 7 tabs)
       bottomNavIconSize: 22,
       tabs: [
         ContractorJobsPage(),
         ContractorProjectsPage(),
         CalendarPage(),
         ContractorUpdatesPage(),
+        const AnalyticsPage(),
         ContractorPhotosPage(),
         ContractorAccountPage(),
       ],
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
-        BottomNavigationBarItem(icon: Icon(Icons.layers), label: 'Projects'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
-        BottomNavigationBarItem(icon: Icon(Icons.timeline), label: 'Updates'),
-        BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: 'Photos'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
+      items: [
+        const BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
+        const BottomNavigationBarItem(icon: Icon(Icons.layers), label: 'Projects'),
+        const BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
+        BottomNavigationBarItem(icon: NotificationsBadge(child: const Icon(Icons.timeline)), label: 'Updates'),
+        const BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Analytics'),
+        const BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: 'Photos'),
+        const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
       ],
       initialIndex: initialTab,
       appBarTitles: const [
@@ -89,6 +96,7 @@ class ContractorHomePage extends StatelessWidget {
         'Projects',
         'Calendar',
         'Updates',
+        'Analytics & Reporting',
         'Photos',
         'Account',
       ],
@@ -99,8 +107,9 @@ class ContractorHomePage extends StatelessWidget {
           case 1: path = '/admin/projects'; break;
           case 2: path = '/admin/calendar'; break;
           case 3: path = '/admin/updates'; break;
-          case 4: path = '/admin/photos'; break;
-          case 5: path = '/admin/account'; break;
+          case 4: path = '/admin/analytics'; break;
+          case 5: path = '/admin/photos'; break;
+          case 6: path = '/admin/account'; break;
         }
         // Replace route to avoid piling history when just switching tabs
         if (ModalRoute.of(context)?.settings.name != path) {
@@ -123,6 +132,7 @@ class ContractorHomePage extends StatelessWidget {
             return const SizedBox.shrink();
           },
         ),
+        const NotificationBell(),
         IconButton(
           tooltip: 'Sign out',
           icon: const Icon(Icons.logout),
@@ -176,6 +186,7 @@ class ContractorHomePage extends StatelessWidget {
             ),
           ),
         ),
+        null,
         null,
         null,
         null,

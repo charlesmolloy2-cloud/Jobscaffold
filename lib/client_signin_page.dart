@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'state/app_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClientSignInPage extends StatefulWidget {
   const ClientSignInPage({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _signingIn = false;
+  bool _rememberMe = true;
 
   @override
   void dispose() {
@@ -27,6 +29,17 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Load remembered email for clients
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString('remember_email_client');
+      if (saved != null && mounted) {
+        setState(() {
+          _emailController.text = saved;
+          _rememberMe = true;
+        });
+      }
+    }();
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map && args['signedOut'] == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,6 +60,15 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+      // Persist remembered email if opted in
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        if (_rememberMe) {
+          await prefs.setString('remember_email_client', _emailController.text.trim());
+        } else {
+          await prefs.remove('remember_email_client');
+        }
+      } catch (_) {}
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,
@@ -71,6 +93,23 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    // If user is already authenticated, skip this screen entirely.
+    final current = FirebaseAuth.instance.currentUser;
+    if (current != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/client',
+          (route) => false,
+          arguments: const {'signedIn': true},
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     // If demo bypass is active, skip this screen entirely.
     final demoBypass = context.watch<AppState>().devBypassRole;
     if (demoBypass == 'client') {
@@ -124,6 +163,29 @@ class _ClientSignInPageState extends State<ClientSignInPage> {
                     decoration: const InputDecoration(labelText: 'Password'),
                     validator: (v) => (v == null || v.isEmpty) ? 'Enter your password' : null,
                   ),
+                  CheckboxListTile(
+                    value: _rememberMe,
+                    onChanged: (v) => setState(() => _rememberMe = v ?? true),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Remember my email on this device'),
+                  ),
+                  if (_emailController.text.isNotEmpty)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove('remember_email_client');
+                          setState(() {
+                            _emailController.clear();
+                            _rememberMe = false;
+                          });
+                        },
+                        icon: const Icon(Icons.swap_horiz, size: 18),
+                        label: const Text('Switch account'),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: _signingIn ? null : _signIn,

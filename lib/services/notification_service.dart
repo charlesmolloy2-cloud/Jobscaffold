@@ -2,11 +2,16 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 /// Service for handling push notifications via Firebase Cloud Messaging
 class NotificationService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Read VAPID key from --dart-define FCM_VAPID_KEY (for web)
+  static const String vapidKey = String.fromEnvironment('FCM_VAPID_KEY');
 
   /// Initialize notification service and request permissions
   Future<void> initialize() async {
@@ -51,7 +56,7 @@ class NotificationService {
       // For web, use vapidKey (get from Firebase Console → Project Settings → Cloud Messaging)
       final token = kIsWeb
           ? await _messaging.getToken(
-              vapidKey: 'YOUR_VAPID_KEY_HERE', // Replace with your VAPID key
+              vapidKey: (vapidKey.isEmpty ? null : vapidKey),
             )
           : await _messaging.getToken();
 
@@ -65,13 +70,27 @@ class NotificationService {
 
   /// Save FCM token to Firestore for this user
   Future<void> saveTokenToFirestore(String token) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     if (user == null) return;
 
     try {
+      // Back-compat: keep last token on user doc
       await _firestore.collection('users').doc(user.uid).set({
         'fcmToken': token,
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // Preferred: store tokens in a subcollection to support multi-device
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('tokens')
+          .doc(token)
+          .set({
+        'token': token,
+        'platform': kIsWeb ? 'web' : 'app',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
       print('FCM token saved to Firestore');
@@ -83,7 +102,13 @@ class NotificationService {
   /// Handle foreground messages (when app is open)
   void _handleForegroundMessage(RemoteMessage message) {
     print('Foreground message received: ${message.notification?.title}');
-    
+    // Minimal UX: try to show a SnackBar if we can find a context
+    final ctx = _ForegroundMessenger.navigatorKey.currentContext;
+    if (ctx != null && message.notification != null) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(message.notification!.title ?? message.notification!.body ?? 'New notification')),
+      );
+    }
     // You can show a local notification or update UI here
     if (message.notification != null) {
       print('Notification Title: ${message.notification!.title}');
@@ -165,6 +190,21 @@ class NotificationService {
 /// Must be top-level or static
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Background message received: ${message.notification?.title}');
+}
+
+/// Helper to ensure a ScaffoldMessenger is available app-wide for SnackBars
+class _ForegroundMessenger extends StatelessWidget {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final Widget child;
+  const _ForegroundMessenger({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (settings) => MaterialPageRoute(builder: (_) => child),
+    );
+  }
 }
 
 /// Notification preferences model

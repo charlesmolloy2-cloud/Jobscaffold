@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../state/app_state.dart';
 import '../../widgets/fade_in.dart';
 import '../../widgets/app_nav_scaffold.dart';
+import '../../widgets/notifications_badge.dart';
+import '../../widgets/notification_bell.dart';
 import 'client_jobs_page.dart';
 import '../../features/calendar/calendar_page.dart';
 import 'client_updates_page.dart';
@@ -63,12 +65,12 @@ class ClientHomePage extends StatelessWidget {
         ClientPhotosPage(),
         ClientAccountPage(),
       ],
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
-        BottomNavigationBarItem(icon: Icon(Icons.timeline), label: 'Updates'),
-        BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: 'Photos'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
+      items: [
+        const BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
+        const BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
+  BottomNavigationBarItem(icon: NotificationsBadge(child: const Icon(Icons.timeline)), label: 'Updates'),
+        const BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: 'Photos'),
+        const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
       ],
       initialIndex: initialTab,
       appBarTitles: const [
@@ -107,6 +109,7 @@ class ClientHomePage extends StatelessWidget {
             return const SizedBox.shrink();
           },
         ),
+        const NotificationBell(),
         IconButton(
           tooltip: 'Sign out',
           icon: const Icon(Icons.logout),

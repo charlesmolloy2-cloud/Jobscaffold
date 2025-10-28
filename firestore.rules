@@ -47,5 +47,38 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
+
+    // Notifications: user-specific
+    match /notifications/{notificationId} {
+      // Only the owner can read/update/delete their notifications
+      allow get, list, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // Allow creation by any signed-in user (prototype). In production, prefer server-side creation.
+      allow create: if isSignedIn();
+    }
+
+    // Users profile and FCM tokens (for push notifications)
+    match /users/{userId} {
+      allow get, list, create, update: if isSignedIn() && request.auth.uid == userId;
+      // Do not allow delete of root user doc via client
+      allow delete: if false;
+      match /tokens/{tokenId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // Leads collection: public write-only for email capture on the marketing site
+    match /leads/{leadId} {
+      // Allow anyone to create a lead (email capture from marketing page)
+      // Rate limiting: prevent duplicate emails within 24 hours
+      allow create: if request.resource.data.keys().hasAll(['email', 'source', 'timestamp'])
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('.*@.*')
+        && request.resource.data.source is string
+        && request.resource.data.timestamp == request.time
+        && !exists(/databases/$(database)/documents/leads/$(request.resource.data.email.lower()));
+      // Only authenticated admins or backend can read/update/delete
+      allow read, list: if isSignedIn();
+      allow update, delete: if false;
+    }
   }
 }

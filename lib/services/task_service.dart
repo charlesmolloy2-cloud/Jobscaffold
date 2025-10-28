@@ -132,6 +132,47 @@ class TaskService {
         .collection('tasks')
         .doc(taskId)
         .update(updates);
+
+    // Create lightweight notifications for assignment/updates
+    try {
+      // Fetch the task to know creator/assignee
+      final taskDoc = await _firestore
+          .collection('projects')
+          .doc(projectId)
+          .collection('tasks')
+          .doc(taskId)
+          .get();
+      final task = Task.fromFirestore(taskDoc);
+
+      // Notify the assignee if task was assigned or updated
+      final targetAssignee = assignedTo ?? task.assignedTo;
+      if (targetAssignee != null && targetAssignee.isNotEmpty) {
+        await _firestore.collection('notifications').add({
+          'userId': targetAssignee,
+          'title': 'Task updated',
+          'body': task.title,
+          'type': 'task_update',
+          'data': {'taskId': taskId, 'projectId': projectId},
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // If completed, notify the creator
+      if (status == TaskStatus.completed) {
+        await _firestore.collection('notifications').add({
+          'userId': task.createdBy,
+          'title': 'Task completed',
+          'body': task.title,
+          'type': 'task_completed',
+          'data': {'taskId': taskId, 'projectId': projectId},
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (_) {
+      // Best-effort: Don't block on notification creation failures
+    }
   }
 
   // Toggle task completion

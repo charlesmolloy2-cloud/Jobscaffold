@@ -31,6 +31,7 @@ A comprehensive Flutter project management platform for construction contractors
 - **Invoicing & Payments**: Stripe integration for secure checkout
 - **File Management**: Upload and share project documents and photos
 - **E-Signature**: Digital signature capture for contracts
+- **Notifications**: Push (FCM) and optional email (SendGrid)
 - **Analytics**: Firebase Analytics and Crashlytics integration
 - **Cross-Platform**: Web (live), Android (ready), and iOS (ready)
 
@@ -76,6 +77,11 @@ A comprehensive Flutter project management platform for construction contractors
    flutter run -d chrome
    ```
 
+      For web push notifications, add your VAPID key:
+      ```powershell
+      flutter run -d chrome --dart-define FCM_VAPID_KEY=YOUR_PUBLIC_VAPID_KEY
+      ```
+
 4. **Build for production:**
    ```bash
    flutter build web --release
@@ -97,12 +103,26 @@ To enable authentication:
 2. Enable Email/Password in Firebase Console
 3. Optional: Enable Google & Microsoft OAuth
 
+To enable push notifications:
+1. Ensure Cloud Messaging is enabled in Firebase Console.
+2. For web, set a VAPID key in Project Settings → Cloud Messaging and pass it via `--dart-define FCM_VAPID_KEY=...`.
+3. The service worker `web/firebase-messaging-sw.js` is included and references your messagingSenderId.
+
+To enable email notifications (optional):
+1. Create a SendGrid account and API key.
+2. Set environment for Functions: `SENDGRID_API_KEY` and `SENDGRID_FROM` or use `functions:config:set sendgrid.key=... sendgrid.from=...`.
+
 ## 🚀 Deployment
 
 ### Manual Deploy (Firebase Hosting)
 ```bash
 flutter build web --release
 firebase deploy --only hosting
+```
+
+To deploy Cloud Functions (notifications fanout and Stripe):
+```powershell
+cd functions; npm install; npm run build; firebase deploy --only functions
 ```
 
 ### GitHub Actions (Automated)

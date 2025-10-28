@@ -10,6 +10,10 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  exclude:
+    - lib/pages/common/contractors_page.dart
+    - lib/pages/common/public_home_page.dart
+    - lib/pages/common/landing_page.dart
   errors:
     deprecated_member_use: ignore
     use_build_context_synchronously: ignore

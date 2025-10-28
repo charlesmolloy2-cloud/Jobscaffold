@@ -12,8 +12,7 @@ import 'pages/contractor/contractor_home_page.dart';
 
 // Common
 import 'pages/common/login_page.dart';
-import 'pages/common/public_home_page.dart';
-import 'pages/common/landing_page.dart';
+import 'pages/common/contractors_page_v2.dart';
 
 // Optional feature demo routes (standalone screens)
 import 'features/calendar/calendar_page.dart';
@@ -29,14 +28,15 @@ import 'features/projects/app_project_detail_page.dart';
 import 'pages/common/privacy_page.dart';
 import 'pages/common/terms_page.dart';
 import 'pages/common/demo_login_page.dart';
+import 'pages/common/leads_admin_page.dart';
 
 // Export a single map of route name to builder. Keep '/' reserved for the index in main.dart
 final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
   // Landing and auth
   '/role_select': (_) => const RoleSelectPage(),
   '/home': (_) => const HomePage(),
-  '/': (_) => const PublicHomePage(),
-  '/landing': (_) => const LandingPage(),
+  '/': (_) => const ContractorsPageV2(),
+  '/contractors': (_) => const ContractorsPageV2(),
   '/demo_login': (_) => const DemoLoginPage(),
   '/login': (_) => const LoginPage(),
   '/client_signin': (_) => const ClientSignInPage(),
@@ -45,6 +45,14 @@ final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
   // Primary apps (client/contractor containers)
   '/client': (_) => const ClientHomePage(),
   '/admin': (_) => const ContractorHomePage(),
+  // Deep links to specific contractor tabs
+  '/admin/jobs': (_) => const ContractorHomePage(),
+  '/admin/projects': (_) => const ContractorHomePage(),
+  '/admin/calendar': (_) => const ContractorHomePage(),
+  '/admin/updates': (_) => const ContractorHomePage(),
+  '/admin/analytics': (_) => const ContractorHomePage(),
+  '/admin/photos': (_) => const ContractorHomePage(),
+  '/admin/account': (_) => const ContractorHomePage(),
 
   // Demos
   // Firebase demo intentionally omitted from web build to avoid web plugin constraints
@@ -62,4 +70,5 @@ final Map<String, WidgetBuilder> generatedRoutes = <String, WidgetBuilder>{
   '/project': (_) => const AppProjectDetailPage(),
   '/privacy': (_) => const PrivacyPage(),
   '/terms': (_) => const TermsPage(),
+  '/leads_admin': (_) => const LeadsAdminPage(),
 };
