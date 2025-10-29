@@ -550,12 +550,23 @@ class _EmailCaptureState extends State<_EmailCapture> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
-      final email = _email.text.trim();
-      await FirebaseFirestore.instance.collection('leads').add({
+      final email = _email.text.trim().toLowerCase();
+      // Capture UTM params and landing path
+      final qp = Uri.base.queryParameters;
+      final meta = <String, dynamic>{
+        'utm_source': qp['utm_source'],
+        'utm_medium': qp['utm_medium'],
+        'utm_campaign': qp['utm_campaign'],
+        'utm_term': qp['utm_term'],
+        'utm_content': qp['utm_content'],
+        'landing_path': Uri.base.path,
+      }..removeWhere((k, v) => v == null || (v is String && v.isEmpty));
+      await FirebaseFirestore.instance.collection('leads').doc(email).set({
         'email': email,
-        'createdAt': FieldValue.serverTimestamp(),
+        'timestamp': FieldValue.serverTimestamp(),
         'source': 'public_home',
-      });
+        ...meta,
+      }, SetOptions(merge: true));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Thanks! We\'ll be in touch.')),

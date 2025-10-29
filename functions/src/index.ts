@@ -613,8 +613,13 @@ export const onLeadCreated = onDocumentCreated('leads/{leadId}', async (event) =
 
     const email = leadData.email;
     const source = leadData.source || 'unknown';
+    const utm_source = leadData.utm_source || null;
+    const utm_medium = leadData.utm_medium || null;
+    const utm_campaign = leadData.utm_campaign || null;
+    const landing_path = leadData.landing_path || null;
+    const referrer = leadData.referrer || null;
     
-    console.log(`New lead captured: ${email} from ${source}`);
+    console.log(`New lead captured: ${email} from ${utm_source || source}`);
 
     // Send welcome email if SendGrid is configured
     if (sendgridKey && sendgridFrom) {
@@ -686,7 +691,7 @@ export const onLeadCreated = onDocumentCreated('leads/{leadId}', async (event) =
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: `*New Lead Captured*\n📧 Email: ${email}\n📍 Source: ${source}`,
+                  text: `*New Lead Captured*\n📧 Email: ${email}\n📍 Source: ${utm_source || source}${utm_medium ? ` (${utm_medium})` : ''}${utm_campaign ? ` – ${utm_campaign}` : ''}${landing_path ? `\n🧭 Path: ${landing_path}` : ''}${referrer ? `\n↩️ Referrer: ${referrer}` : ''}`,
                 },
               },
             ],
@@ -725,9 +730,14 @@ export const weeklyLeadSummary = onSchedule('every monday 09:00', async () => {
       .get();
     
     const leads = snapshot.docs.map(doc => ({
-      email: doc.data().email,
-      source: doc.data().source,
-      timestamp: doc.data().timestamp?.toDate(),
+      email: doc.data().email as string,
+      source: doc.data().source as string | undefined,
+      utm_source: doc.data().utm_source as string | undefined,
+      utm_medium: doc.data().utm_medium as string | undefined,
+      utm_campaign: doc.data().utm_campaign as string | undefined,
+      referrer: doc.data().referrer as string | undefined,
+      landing_path: doc.data().landing_path as string | undefined,
+      timestamp: doc.data().timestamp?.toDate() as Date | undefined,
     }));
     
     const totalLeads = snapshot.size;
@@ -737,25 +747,37 @@ export const weeklyLeadSummary = onSchedule('every monday 09:00', async () => {
       return;
     }
     
-    // Group by source
+    // Group by utm_source (fallback to source)
     const sourceBreakdown: Record<string, number> = {};
+    const referrerBreakdown: Record<string, number> = {};
     leads.forEach(lead => {
-      const source = lead.source || 'unknown';
-      sourceBreakdown[source] = (sourceBreakdown[source] || 0) + 1;
+      const key = (lead.utm_source || lead.source || 'unknown').toString();
+      sourceBreakdown[key] = (sourceBreakdown[key] || 0) + 1;
+      if (lead.referrer) {
+        const ref = lead.referrer;
+        referrerBreakdown[ref] = (referrerBreakdown[ref] || 0) + 1;
+      }
     });
     
     // Build email content
     const leadsList = leads.map(l => 
-      `• ${l.email} (${l.source}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}`
+      `• ${l.email} (${l.utm_source || l.source || 'unknown'}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}`
     ).join('\n');
     
     const sourceSummary = Object.entries(sourceBreakdown)
+      .sort((a,b) => b[1]-a[1])
       .map(([source, count]) => `• ${source}: ${count}`)
+      .join('\n');
+    const topReferrers = Object.entries(referrerBreakdown)
+      .sort((a,b) => b[1]-a[1])
+      .slice(0, 5)
+      .map(([ref, count]) => `• ${ref}: ${count}`)
       .join('\n');
     
     const emailText = `Weekly Lead Summary\n\n` +
       `Total new leads this week: ${totalLeads}\n\n` +
       `Breakdown by source:\n${sourceSummary}\n\n` +
+      (topReferrers ? `Top referrers:\n${topReferrers}\n\n` : '') +
       `All leads:\n${leadsList}`;
     
     const emailHtml = `
@@ -767,10 +789,11 @@ export const weeklyLeadSummary = onSchedule('every monday 09:00', async () => {
           `<li>${source}: ${count}</li>`
         ).join('')}
       </ul>
+      ${topReferrers ? `<h3>Top referrers:</h3><ul>${Object.entries(referrerBreakdown).sort((a:any,b:any)=>b[1]-a[1]).slice(0,5).map(([ref,count])=>`<li>${ref}: ${count}</li>`).join('')}</ul>` : ''}
       <h3>All leads:</h3>
       <ul>
         ${leads.map(l => 
-          `<li>${l.email} (${l.source}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}</li>`
+          `<li>${l.email} (${l.utm_source || l.source || 'unknown'}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}</li>`
         ).join('')}
       </ul>
     `;
@@ -809,7 +832,7 @@ export const weeklyLeadSummary = onSchedule('every monday 09:00', async () => {
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: `*Weekly Lead Summary*\n\n*Total:* ${totalLeads}\n\n*By source:*\n${sourceSummary}`,
+                  text: `*Weekly Lead Summary*\n\n*Total:* ${totalLeads}\n\n*By source:*\n${sourceSummary}${topReferrers ? `\n\n*Top referrers:*\n${topReferrers}` : ''}`,
                 },
               },
             ],

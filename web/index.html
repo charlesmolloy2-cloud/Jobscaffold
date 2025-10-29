@@ -30,6 +30,33 @@
   <meta name="twitter:description" content="Connect homeowners and contractors with clear communication, scheduling, files, and payments.">
   <meta name="twitter:image" content="icons/Icon-512.png">
 
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "JobScaffold",
+    "url": "https://jobscaffold.com/",
+    "logo": "https://jobscaffold.com/icons/Icon-512.png",
+    "sameAs": [
+      "https://www.linkedin.com/company/jobscaffold"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "JobScaffold",
+    "url": "https://jobscaffold.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://jobscaffold.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -44,6 +71,7 @@
   <link rel="manifest" href="manifest.json">
   <!-- Canonical URL for JobScaffold -->
   <link rel="canonical" href="https://jobscaffold.com/" />
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
   <style id="splash-screen-style">
     html {
       height: 100%

@@ -716,6 +716,19 @@ class _FooterState extends State<_Footer> {
     try {
       final email = _emailController.text.trim().toLowerCase();
       
+      // Capture UTM params and landing path (portable)
+      final Map<String, dynamic> meta = {};
+      final qp = Uri.base.queryParameters;
+      meta.addAll({
+        'utm_source': qp['utm_source'],
+        'utm_medium': qp['utm_medium'],
+        'utm_campaign': qp['utm_campaign'],
+        'utm_term': qp['utm_term'],
+        'utm_content': qp['utm_content'],
+        'landing_path': Uri.base.path,
+      });
+      meta.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
+      
       // Check if email already exists (rate limiting)
       final existing = await FirebaseFirestore.instance
           .collection('leads')
@@ -735,6 +748,7 @@ class _FooterState extends State<_Footer> {
         'email': email,
         'source': 'contractors_page_footer',
         'timestamp': FieldValue.serverTimestamp(),
+        ...meta,
       });
       
       // Track analytics event
@@ -744,6 +758,9 @@ class _FooterState extends State<_Footer> {
           parameters: {
             'source': 'contractors_page_footer',
             'email_domain': email.split('@').last,
+            if (meta['utm_source'] != null) 'utm_source': meta['utm_source'],
+            if (meta['utm_medium'] != null) 'utm_medium': meta['utm_medium'],
+            if (meta['utm_campaign'] != null) 'utm_campaign': meta['utm_campaign'],
           },
         );
       } catch (_) {}
