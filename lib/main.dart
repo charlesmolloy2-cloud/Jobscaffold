@@ -143,7 +143,8 @@ class MyApp extends StatelessWidget {
   '/how_to_use_files': (_) => const HowToUseFilesPage(),
   '/how_to_use_feedback': (_) => const HowToUseFeedbackPage(),
   '/how_to_use_profile': (_) => const HowToUseProfilePage(),
-  '/admin': (_) => const AdminPanelPage(),
+  // Keep contractor dashboard as '/admin'. Expose admin panel under a separate path.
+  '/admin_panel': (_) => const AdminPanelPage(),
       },
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';

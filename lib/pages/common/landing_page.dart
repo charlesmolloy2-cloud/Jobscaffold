@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../../widgets/fade_in.dart';
 import '../../widgets/slide_fade_in.dart';
 import '../../widgets/temp_logo.dart';
@@ -693,12 +694,22 @@ class _EmailCaptureState extends State<_EmailCapture> {
         'utm_content': qp['utm_content'],
         'landing_path': Uri.base.path,
       }..removeWhere((k, v) => v == null || (v is String && v.isEmpty));
-      await FirebaseFirestore.instance.collection('leads').doc(email).set({
-        'email': email,
-        'timestamp': FieldValue.serverTimestamp(),
-        'source': 'public_home',
-        ...meta,
-      }, SetOptions(merge: true));
+      final callable = FirebaseFunctions.instance.httpsCallable('createLead');
+      try {
+        await callable.call({
+          'email': email,
+          'source': 'public_home',
+          ...meta,
+        });
+      } catch (_) {
+        // Fallback to direct write if function unavailable
+        await FirebaseFirestore.instance.collection('leads').doc(email).set({
+          'email': email,
+          'timestamp': FieldValue.serverTimestamp(),
+          'source': 'public_home',
+          ...meta,
+        }, SetOptions(merge: true));
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Thanks! We\'ll be in touch.')),

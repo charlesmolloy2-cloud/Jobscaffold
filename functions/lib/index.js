@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.weeklyLeadSummary = exports.onLeadCreated = exports.createAdminUser = exports.testNotify = exports.onContractCompleted = exports.sendOnNotificationCreate = exports.onNewMessage = exports.onInvoiceCreated = exports.onFileUpload = exports.onProjectUpdate = exports.stripeWebhook = exports.createCheckoutSession = void 0;
+exports.weeklyLeadSummary = exports.onLeadCreated = exports.createLead = exports.createAdminUser = exports.testNotify = exports.onContractCompleted = exports.sendOnNotificationCreate = exports.onNewMessage = exports.onInvoiceCreated = exports.onFileUpload = exports.onProjectUpdate = exports.stripeWebhook = exports.createCheckoutSession = void 0;
 const admin = __importStar(require("firebase-admin"));
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
@@ -599,6 +599,63 @@ exports.createAdminUser = (0, https_1.onRequest)(async (request, response) => {
 // ========================================
 // LEAD PROCESSING
 // ========================================
+/**
+ * Secure lead creation endpoint.
+ * Optionally verifies reCAPTCHA v3 token if RECAPTCHA_SECRET is configured.
+ * Accepts: { email, source, utm_*, landing_path, referrer, user_agent }
+ */
+exports.createLead = (0, https_1.onCall)(async (request) => {
+    try {
+        const data = request.data || {};
+        const emailRaw = (data.email || '').toString().trim().toLowerCase();
+        if (!emailRaw || !emailRaw.includes('@')) {
+            throw new https_1.HttpsError('invalid-argument', 'Valid email is required');
+        }
+        const recaptchaSecret = process.env.RECAPTCHA_SECRET;
+        const minScore = Number(process.env.RECAPTCHA_MIN_SCORE || '0.5');
+        const token = (data.recaptchaToken || '').toString();
+        if (recaptchaSecret) {
+            if (!token) {
+                throw new https_1.HttpsError('failed-precondition', 'Missing reCAPTCHA token');
+            }
+            // Verify token
+            const params = new URLSearchParams();
+            params.append('secret', recaptchaSecret);
+            params.append('response', token);
+            const verifyResp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params,
+            });
+            const verify = await verifyResp.json();
+            const ok = !!verify.success && (typeof verify.score === 'number' ? verify.score >= minScore : true);
+            if (!ok) {
+                console.warn('reCAPTCHA verification failed', verify);
+                throw new https_1.HttpsError('permission-denied', 'reCAPTCHA verification failed');
+            }
+        }
+        const email = emailRaw;
+        const payload = {
+            email,
+            source: (data.source || 'unknown').toString(),
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        };
+        const fields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'landing_path', 'referrer', 'user_agent'];
+        for (const f of fields) {
+            if (data[f] != null && `${data[f]}`.length > 0)
+                payload[f] = `${data[f]}`;
+        }
+        // Upsert lead by email doc id (dedupe)
+        await admin.firestore().collection('leads').doc(email).set(payload, { merge: true });
+        return { ok: true };
+    }
+    catch (err) {
+        console.error('createLead error', err);
+        if (err instanceof https_1.HttpsError)
+            throw err;
+        throw new https_1.HttpsError('internal', err?.message || 'Unknown error');
+    }
+});
 exports.onLeadCreated = (0, firestore_1.onDocumentCreated)('leads/{leadId}', async (event) => {
     try {
         const leadData = event.data?.data();
@@ -606,7 +663,12 @@ exports.onLeadCreated = (0, firestore_1.onDocumentCreated)('leads/{leadId}', asy
             return;
         const email = leadData.email;
         const source = leadData.source || 'unknown';
-        console.log(`New lead captured: ${email} from ${source}`);
+        const utm_source = leadData.utm_source || null;
+        const utm_medium = leadData.utm_medium || null;
+        const utm_campaign = leadData.utm_campaign || null;
+        const landing_path = leadData.landing_path || null;
+        const referrer = leadData.referrer || null;
+        console.log(`New lead captured: ${email} from ${utm_source || source}`);
         // Send welcome email if SendGrid is configured
         if (sendgridKey && sendgridFrom) {
             try {
@@ -677,7 +739,7 @@ exports.onLeadCreated = (0, firestore_1.onDocumentCreated)('leads/{leadId}', asy
                                 type: 'section',
                                 text: {
                                     type: 'mrkdwn',
-                                    text: `*New Lead Captured*\n📧 Email: ${email}\n📍 Source: ${source}`,
+                                    text: `*New Lead Captured*\n📧 Email: ${email}\n📍 Source: ${utm_source || source}${utm_medium ? ` (${utm_medium})` : ''}${utm_campaign ? ` – ${utm_campaign}` : ''}${landing_path ? `\n🧭 Path: ${landing_path}` : ''}${referrer ? `\n↩️ Referrer: ${referrer}` : ''}`,
                                 },
                             },
                         ],
@@ -713,6 +775,11 @@ exports.weeklyLeadSummary = (0, scheduler_1.onSchedule)('every monday 09:00', as
         const leads = snapshot.docs.map(doc => ({
             email: doc.data().email,
             source: doc.data().source,
+            utm_source: doc.data().utm_source,
+            utm_medium: doc.data().utm_medium,
+            utm_campaign: doc.data().utm_campaign,
+            referrer: doc.data().referrer,
+            landing_path: doc.data().landing_path,
             timestamp: doc.data().timestamp?.toDate(),
         }));
         const totalLeads = snapshot.size;
@@ -720,20 +787,32 @@ exports.weeklyLeadSummary = (0, scheduler_1.onSchedule)('every monday 09:00', as
             console.log('No new leads this week');
             return;
         }
-        // Group by source
+        // Group by utm_source (fallback to source)
         const sourceBreakdown = {};
+        const referrerBreakdown = {};
         leads.forEach(lead => {
-            const source = lead.source || 'unknown';
-            sourceBreakdown[source] = (sourceBreakdown[source] || 0) + 1;
+            const key = (lead.utm_source || lead.source || 'unknown').toString();
+            sourceBreakdown[key] = (sourceBreakdown[key] || 0) + 1;
+            if (lead.referrer) {
+                const ref = lead.referrer;
+                referrerBreakdown[ref] = (referrerBreakdown[ref] || 0) + 1;
+            }
         });
         // Build email content
-        const leadsList = leads.map(l => `• ${l.email} (${l.source}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}`).join('\n');
+        const leadsList = leads.map(l => `• ${l.email} (${l.utm_source || l.source || 'unknown'}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}`).join('\n');
         const sourceSummary = Object.entries(sourceBreakdown)
+            .sort((a, b) => b[1] - a[1])
             .map(([source, count]) => `• ${source}: ${count}`)
+            .join('\n');
+        const topReferrers = Object.entries(referrerBreakdown)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([ref, count]) => `• ${ref}: ${count}`)
             .join('\n');
         const emailText = `Weekly Lead Summary\n\n` +
             `Total new leads this week: ${totalLeads}\n\n` +
             `Breakdown by source:\n${sourceSummary}\n\n` +
+            (topReferrers ? `Top referrers:\n${topReferrers}\n\n` : '') +
             `All leads:\n${leadsList}`;
         const emailHtml = `
       <h2>Weekly Lead Summary</h2>
@@ -742,9 +821,10 @@ exports.weeklyLeadSummary = (0, scheduler_1.onSchedule)('every monday 09:00', as
       <ul>
         ${Object.entries(sourceBreakdown).map(([source, count]) => `<li>${source}: ${count}</li>`).join('')}
       </ul>
+      ${topReferrers ? `<h3>Top referrers:</h3><ul>${Object.entries(referrerBreakdown).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ref, count]) => `<li>${ref}: ${count}</li>`).join('')}</ul>` : ''}
       <h3>All leads:</h3>
       <ul>
-        ${leads.map(l => `<li>${l.email} (${l.source}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}</li>`).join('')}
+        ${leads.map(l => `<li>${l.email} (${l.utm_source || l.source || 'unknown'}) - ${l.timestamp?.toLocaleDateString() || 'N/A'}</li>`).join('')}
       </ul>
     `;
         // Send to admin emails if SendGrid is configured
@@ -782,7 +862,7 @@ exports.weeklyLeadSummary = (0, scheduler_1.onSchedule)('every monday 09:00', as
                                 type: 'section',
                                 text: {
                                     type: 'mrkdwn',
-                                    text: `*Weekly Lead Summary*\n\n*Total:* ${totalLeads}\n\n*By source:*\n${sourceSummary}`,
+                                    text: `*Weekly Lead Summary*\n\n*Total:* ${totalLeads}\n\n*By source:*\n${sourceSummary}${topReferrers ? `\n\n*Top referrers:*\n${topReferrers}` : ''}`,
                                 },
                             },
                         ],

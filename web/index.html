@@ -72,6 +72,22 @@
   <!-- Canonical URL for JobScaffold -->
   <link rel="canonical" href="https://jobscaffold.com/" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+  
+  <!-- Optional: reCAPTCHA v3 (configure site key to enable) -->
+  <!-- <meta name="recaptcha-site-key" content="YOUR_RECAPTCHA_SITE_KEY" /> -->
+  <script>
+    (function(){
+      try {
+        var meta = document.querySelector('meta[name="recaptcha-site-key"]');
+        var siteKey = meta && meta.getAttribute('content');
+        if (siteKey) {
+          var s = document.createElement('script');
+          s.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey);
+          s.async = true; s.defer = true; document.head.appendChild(s);
+        }
+      } catch (e) { /* no-op */ }
+    })();
+  </script>
   <style id="splash-screen-style">
     html {
       height: 100%

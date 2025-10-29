@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../widgets/temp_logo.dart';
 import '../../widgets/slide_fade_in.dart';
@@ -474,7 +476,11 @@ class _AnalyticsSection extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/analytics'),
+                  onPressed: () {
+                    final user = FirebaseAuth.instance.currentUser;
+                    final target = (user != null) ? '/admin/analytics' : '/analytics';
+                    Navigator.pushNamed(context, target);
+                  },
                   icon: const Icon(Icons.bar_chart),
                   label: const Text('View full analytics'),
                 ),
@@ -729,27 +735,24 @@ class _FooterState extends State<_Footer> {
       });
       meta.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
       
-      // Check if email already exists (rate limiting)
-      final existing = await FirebaseFirestore.instance
-          .collection('leads')
-          .doc(email)
-          .get();
-      
-      if (existing.exists) {
-        if (!mounted) return;
-        setState(() {
-          _message = 'You\'re already on the list! We\'ll be in touch soon.';
+      // Prefer secure callable API (server can verify reCAPTCHA when configured)
+      final callable = FirebaseFunctions.instance.httpsCallable('createLead');
+      try {
+        await callable.call({
+          'email': email,
+          'source': 'contractors_page_footer',
+          ...meta,
+          // 'recaptchaToken': await _maybeRecaptchaToken('lead_submit'), // optional, when configured
         });
-        return;
+      } catch (e) {
+        // Fallback to direct write if function unavailable
+        await FirebaseFirestore.instance.collection('leads').doc(email).set({
+          'email': email,
+          'source': 'contractors_page_footer',
+          'timestamp': FieldValue.serverTimestamp(),
+          ...meta,
+        }, SetOptions(merge: true));
       }
-      
-      // Create lead with email as document ID for deduplication
-      await FirebaseFirestore.instance.collection('leads').doc(email).set({
-        'email': email,
-        'source': 'contractors_page_footer',
-        'timestamp': FieldValue.serverTimestamp(),
-        ...meta,
-      });
       
       // Track analytics event
       try {
@@ -779,6 +782,8 @@ class _FooterState extends State<_Footer> {
       if (mounted) setState(() => _submitting = false);
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {

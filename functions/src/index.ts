@@ -606,6 +606,65 @@ export const createAdminUser = onRequest(async (request, response) => {
 // LEAD PROCESSING
 // ========================================
 
+/**
+ * Secure lead creation endpoint.
+ * Optionally verifies reCAPTCHA v3 token if RECAPTCHA_SECRET is configured.
+ * Accepts: { email, source, utm_*, landing_path, referrer, user_agent }
+ */
+export const createLead = onCall(async (request) => {
+  try {
+    const data = request.data || {};
+    const emailRaw = (data.email || '').toString().trim().toLowerCase();
+    if (!emailRaw || !emailRaw.includes('@')) {
+      throw new HttpsError('invalid-argument', 'Valid email is required');
+    }
+
+    const recaptchaSecret = process.env.RECAPTCHA_SECRET;
+    const minScore = Number(process.env.RECAPTCHA_MIN_SCORE || '0.5');
+    const token = (data.recaptchaToken || '').toString();
+
+    if (recaptchaSecret) {
+      if (!token) {
+        throw new HttpsError('failed-precondition', 'Missing reCAPTCHA token');
+      }
+      // Verify token
+      const params = new URLSearchParams();
+      params.append('secret', recaptchaSecret);
+      params.append('response', token);
+      const verifyResp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params,
+      });
+      const verify = await verifyResp.json() as any;
+      const ok = !!verify.success && (typeof verify.score === 'number' ? verify.score >= minScore : true);
+      if (!ok) {
+        console.warn('reCAPTCHA verification failed', verify);
+        throw new HttpsError('permission-denied', 'reCAPTCHA verification failed');
+      }
+    }
+
+    const email = emailRaw;
+    const payload: any = {
+      email,
+      source: (data.source || 'unknown').toString(),
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    const fields = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','landing_path','referrer','user_agent'];
+    for (const f of fields) {
+      if (data[f] != null && `${data[f]}`.length > 0) payload[f] = `${data[f]}`;
+    }
+
+    // Upsert lead by email doc id (dedupe)
+    await admin.firestore().collection('leads').doc(email).set(payload, { merge: true });
+    return { ok: true };
+  } catch (err: any) {
+    console.error('createLead error', err);
+    if (err instanceof HttpsError) throw err;
+    throw new HttpsError('internal', err?.message || 'Unknown error');
+  }
+});
+
 export const onLeadCreated = onDocumentCreated('leads/{leadId}', async (event) => {
   try {
     const leadData = event.data?.data();

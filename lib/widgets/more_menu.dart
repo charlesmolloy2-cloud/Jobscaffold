@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/app_theme.dart';
 
 class MoreMenu extends StatelessWidget {
@@ -6,6 +7,7 @@ class MoreMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
     return ListView(
       children: [
         ListTile(
@@ -68,11 +70,18 @@ class MoreMenu extends StatelessWidget {
           title: const Text('File Sharing'),
           onTap: () => Navigator.pushNamed(context, '/files'),
         ),
-        ListTile(
-          leading: const Icon(Icons.admin_panel_settings, color: Colors.orange),
-          title: const Text('Leads Admin'),
-          onTap: () => Navigator.pushNamed(context, '/leads_admin'),
-        ),
+        if (currentUser != null) ...[
+          ListTile(
+            leading: const Icon(Icons.admin_panel_settings, color: Colors.orange),
+            title: const Text('Leads Admin'),
+            onTap: () => Navigator.pushNamed(context, '/leads_admin'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings_applications, color: Colors.orange),
+            title: const Text('Admin Panel'),
+            onTap: () => Navigator.pushNamed(context, '/admin_panel'),
+          ),
+        ],
         const Divider(),
         ListTile(
           leading: const Icon(Icons.privacy_tip_outlined),
